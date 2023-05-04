@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('./includes/head.ejs') %>
+  <body>
+    <h1>You are on home page</h1>
+    <form action="/users" method="POST">
+      <label for="name">Enter username here:</label>
+      <input type="text" name="name" id="name">
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>
