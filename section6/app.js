@@ -8,13 +8,17 @@ const shopRouter = require("./routes/shop");
 
 const app = express();
 
-// handlebars
-app.engine(
-  "hbs",
-  engine({ layoutsDir: "views/layouts", defaultLayout: "main-layout.hbs" })
-);
-app.set("view engine", "hbs");
+// ejs
+app.set("view engine", "ejs");
 app.set("views", "views");
+
+// handlebars
+// app.engine(
+//   "hbs",
+//   engine({ layoutsDir: "views/layouts", defaultLayout: "main-layout.hbs" })
+// );
+// app.set("view engine", "hbs");
+// app.set("views", "views");
 
 // pug
 // app.set('view engine', 'pug');
@@ -31,6 +35,7 @@ app.use((req, res, next) => {
   res.status(404);
   // res.sendFile(path.join(__dirname, 'views', '404.html'));
   res.render("404", {
+    path: '404',
     pageTitle: "404",
     formsCSS: false,
     productsCSS: false,
