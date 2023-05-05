@@ -9,9 +9,6 @@ const filepath = path.join(
 
 module.exports = class Cart {
     static addProduct(newProductId, newProductPrice) {
-        console.log('Cart addProduct');
-        console.log('newProductId', newProductId);
-        console.log('newProductPrice', newProductPrice);
 
         fs.readFile(filepath, (err, data) => {
             let cart = { products: [], totalPrice: 0 };
@@ -22,9 +19,6 @@ module.exports = class Cart {
                 return product.id === newProductId;
             });
             const existingProduct = cart.products[existingProductIndex];
-
-            console.log('existingProductIndex', existingProductIndex);
-            console.log('existingProduct', existingProduct);
 
             let updatedProduct;
 
@@ -38,15 +32,36 @@ module.exports = class Cart {
                 cart.products = [ ...cart.products, updatedProduct ];
             }
 
-            console.log('old cart.totalPrice', cart.totalPrice);
-
             cart.totalPrice = cart.totalPrice + +newProductPrice;
-
-            console.log('new cart.totalPrice', cart.totalPrice);
 
             fs.writeFile(filepath, JSON.stringify(cart), (err) => {
                 console.log(err);
             })
         })
+    }
+
+    static deleteProduct(productId, productPrice) {
+        fs.readFile(filepath, (err, data) => {
+            if (err) return;
+
+            const cart = JSON.parse(data);
+
+            const updatedCart = { ...cart };
+
+            const existingProductIndex = cart.products.findIndex((product) => {
+                return product.id === productId;
+            });
+            const existingProduct = cart.products[existingProductIndex];
+
+            updatedCart.totalPrice = updatedCart.totalPrice - productPrice * existingProduct.quantity;
+
+            updatedCart.products = updatedCart.products.filter((product) => {
+                return product.id !== productId;
+            });
+
+            fs.writeFile(filepath, JSON.stringify(updatedCart), (err) => {
+                console.log(err);
+            })
+        });
     }
 }
