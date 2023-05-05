@@ -202,3 +202,11 @@ form {
     display: none;
   }
 }
+
+.centered {
+  text-align: center;
+}
+
+.image {
+  width: 100%;
+}
