@@ -1,24 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 
-const p = path.join(
-  path.dirname(process.mainModule.filename),
+const filepath = path.join(
+  path.dirname(require.main.filename),
   'data',
   'products.json'
 );
 
-const getProductsFromFile = cb => {
-  fs.readFile(p, (err, fileContent) => {
+const getProductsFromFile = callback => {
+  fs.readFile(filepath, (err, fileContent) => {
     if (err) {
-      cb([]);
+      callback([]);
     } else {
-      cb(JSON.parse(fileContent));
+      callback(JSON.parse(fileContent));
     }
   });
 };
 
 module.exports = class Product {
-  constructor(title, imageUrl, description, price) {
+  constructor(id, title, imageUrl, description, price) {
+    this.id = id;
     this.title = title;
     this.imageUrl = imageUrl;
     this.description = description;
@@ -26,10 +27,22 @@ module.exports = class Product {
   }
 
   save() {
-    this.id = Math.random().toString();
     getProductsFromFile(products => {
-      products.push(this);
-      fs.writeFile(p, JSON.stringify(products), err => {
+      if (this.id) {
+        const existingProductIndex = products.findIndex((product) => {
+          return product.id === this.id;
+        });
+        const updatedProducts = [ ...products ];
+        updatedProducts[existingProductIndex] = this;
+
+        products = updatedProducts;
+
+      } else {
+        this.id = Math.random().toString();
+        products.push(this);
+      }
+
+      fs.writeFile(filepath, JSON.stringify(products), err => {
         console.log(err);
       });
     });

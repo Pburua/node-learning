@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const filename = path.join(
-  path.dirname(process.mainModule.filename),
+const filepath = path.join(
+  path.dirname(require.main.filename),
   'data',
   'cart.json'
 );
@@ -13,7 +13,7 @@ module.exports = class Cart {
         console.log('newProductId', newProductId);
         console.log('newProductPrice', newProductPrice);
 
-        fs.readFile(filename, (err, data) => {
+        fs.readFile(filepath, (err, data) => {
             let cart = { products: [], totalPrice: 0 };
 
             if (!err) cart = JSON.parse(data);
@@ -44,7 +44,7 @@ module.exports = class Cart {
 
             console.log('new cart.totalPrice', cart.totalPrice);
 
-            fs.writeFile(filename, JSON.stringify(cart), (err) => {
+            fs.writeFile(filepath, JSON.stringify(cart), (err) => {
                 console.log(err);
             })
         })
