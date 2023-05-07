@@ -53,6 +53,8 @@ module.exports = class Cart {
             });
             const existingProduct = cart.products[existingProductIndex];
 
+            if (!existingProduct) return;
+
             updatedCart.totalPrice = updatedCart.totalPrice - productPrice * existingProduct.quantity;
 
             updatedCart.products = updatedCart.products.filter((product) => {
