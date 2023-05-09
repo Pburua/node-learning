@@ -7,6 +7,8 @@ const errorController = require("./controllers/error");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
+const sequelize = require("./util/database");
+
 // Configuration
 
 const app = express();
@@ -24,8 +26,16 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-// Listening
+// Connecting to db and listening
 
-app.listen(8080, () => {
-  console.log(`Server listening at port ${8080}`);
-});
+sequelize
+  .sync()
+  .then(() => {
+    console.log("MySQL database is synced.");
+    app.listen(8080, () => {
+      console.log(`Server listening at port ${8080}`);
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+  });
