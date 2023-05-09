@@ -18,7 +18,7 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
   const productId = req.params.productId;
   // alternatively Product.findByPk(productId)
-  Product.findAll({where: { id: productId }})
+  Product.findAll({ where: { id: productId } })
     .then((products) => {
       const product = products[0];
       res.render("shop/product-detail", {
@@ -47,43 +47,79 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  Cart.getCart((cart) => {
-    Product.fetchAll((products) => {
-      const cartProducts = [];
-      for (let product of products) {
-        const cartProductData = cart.products.find(
-          (cartProduct) => cartProduct.id === product.id
-        );
-        if (cartProductData) {
-          cartProducts.push({
-            productData: product,
-            quantity: cartProductData.quantity,
-          });
-        }
-      }
+  req.user
+    .getCart()
+    .then((cart) => {
+      return cart.getProducts();
+    })
+    .then((cartProducts) => {
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
         cartProducts,
       });
+    })
+    .catch((err) => {
+      consoler.error(err);
     });
-  });
 };
 
 exports.postCart = (req, res, next) => {
   const productId = req.body.productId;
-  Product.findById(productId, (product) => {
-    Cart.addProduct(productId, product.price);
-  });
-  res.redirect("/cart");
+  let fetchedCart;
+  let newQuantity = 1;
+
+  req.user
+    .getCart()
+    .then((cart) => {
+      fetchedCart = cart;
+      return cart.getProducts({ where: { id: productId } });
+    })
+    .then((products) => {
+      let product;
+      if (products.length > 0) {
+        product = products[0];
+      }
+      if (product) {
+        const oldQuantity = product.cartItem.quantity;
+        newQuantity = oldQuantity + 1;
+        return product;
+      }
+      return Product.findByPk(productId);
+    })
+    .then((product) => {
+      return fetchedCart.addProduct(product, {
+        through: { quantity: newQuantity },
+      });
+    })
+    .then(() => {
+      console.log("Cart updated successfully.");
+      res.redirect("/cart");
+    })
+    .catch((err) => {
+      consoler.error(err);
+    });
 };
 
 exports.postDeleteCartItem = (req, res, next) => {
   const productId = req.body.productId;
-  Product.findById(productId, (product) => {
-    Cart.deleteProduct(productId, product.price);
-    res.redirect("/cart");
-  });
+
+  req.user
+    .getCart()
+    .then((cart) => {
+      return cart.getProducts({ where: { id: productId } });
+    })
+    .then((products) => {
+      const product = products[0];
+      return product.cartItem.destroy();
+    })
+    .then(() => {
+      console.log("Cart item deleted successfully.");
+      res.redirect("/cart");
+    })
+    .catch((err) => {
+      consoler.error(err);
+    });
 };
 
 exports.getOrders = (req, res, next) => {
