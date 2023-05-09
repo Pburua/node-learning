@@ -6,6 +6,9 @@
 
         <main>
             <% if (cartProducts.length > 0) { %>
+                <form action="/create-order" method="POST">
+                    <button type="submit" class="btn">Submit Order</button>
+                </form>
                 <ul>
                     <% cartProducts.forEach((cartProduct) => { %>
                         <p>
