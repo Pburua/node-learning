@@ -1,11 +1,5 @@
-MYSQL_HOST = '';
-MYSQL_USER = '';
-MYSQL_DB_NAME = '';
-MYSQL_PASSWORD = '';
+MONGO_URL = 'mongodb://localhost:27017/shop';
 
 module.exports = {
-    MYSQL_HOST,
-    MYSQL_USER,
-    MYSQL_DB_NAME,
-    MYSQL_PASSWORD
+    MONGO_URL
 }
