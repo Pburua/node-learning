@@ -56,7 +56,7 @@ exports.getCart = (req, res, next) => {
       });
     })
     .catch((err) => {
-      consoler.error(err);
+      console.error(err);
     });
 };
 
@@ -69,7 +69,7 @@ exports.postCart = (req, res, next) => {
     })
     .then(() => {
       console.log("Cart updated successfully.");
-      res.redirect('/cart');
+      res.redirect("/cart");
     })
     .catch((err) => {
       console.error(err);
@@ -80,20 +80,13 @@ exports.postDeleteCartItem = (req, res, next) => {
   const productId = req.body.productId;
 
   req.user
-    .getCart()
-    .then((cart) => {
-      return cart.getProducts({ where: { id: productId } });
-    })
-    .then((products) => {
-      const product = products[0];
-      return product.cartItem.destroy();
-    })
+    .deleteItemFromCart(productId)
     .then(() => {
       console.log("Cart item deleted successfully.");
       res.redirect("/cart");
     })
     .catch((err) => {
-      consoler.error(err);
+      console.error(err);
     });
 };
 
