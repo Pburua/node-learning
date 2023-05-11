@@ -11,8 +11,12 @@
                 </form>
                 <ul>
                     <% cartProducts.forEach((cartProduct) => { %>
+                        <% if (cartProduct.productId && cartProduct.quantity) { %>
                         <p>
-                            <li><%= cartProduct.productId.title %> (<%= cartProduct.quantity %>)</li>
+                            <li>
+                                <%= cartProduct.productId.title %> 
+                                (<%= cartProduct.quantity %>)
+                            </li>
                         </p>
                         <form action="/cart-delete-item" method="POST">
                             <input 
@@ -22,6 +26,13 @@
                             >
                             <button type="submit" class="btn">Delete</button>
                         </form>
+                        <% } else { %>
+                            <p>
+                                <li>
+                                    DELETED PRODUCT!
+                                </li>
+                            </p>
+                        <% } %>
                     <% }) %>
                 </ul>
             <% } else { %>
