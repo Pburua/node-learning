@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const UserSchema = Schema({
+const userSchema = Schema({
   name: {
     type: String,
     required: true,
@@ -28,7 +28,46 @@ const UserSchema = Schema({
   },
 });
 
-module.exports = mongoose.model("User", UserSchema);
+userSchema.methods.addToCart = function (product) {
+  const existingCartProductIndex = this.cart.items.findIndex((cartItem) => {
+    return product._id.toString() === cartItem.productId.toString();
+  });
+  const productAlreadyExists = existingCartProductIndex !== -1;
+
+  let newQuantity = 1;
+
+  const updatedCartItems = [...this.cart.items];
+
+  if (productAlreadyExists) {
+    newQuantity = this.cart.items[existingCartProductIndex].quantity + 1;
+    updatedCartItems[existingCartProductIndex].quantity = newQuantity;
+  } else {
+    updatedCartItems.push({
+      productId: product._id,
+      quantity: newQuantity,
+    });
+  }
+
+  const updatedCart = {
+    items: updatedCartItems,
+  };
+
+  this.cart = updatedCart;
+
+  return this.save();
+};
+
+userSchema.methods.deleteItemFromCart = function (productId) {
+  const updatedCartItems = this.cart.items.filter((cartItem) => {
+    return cartItem.productId.toString() !== productId.toString();
+  });
+
+  this.cart.items = updatedCartItems;
+
+  return this.save();
+};
+
+module.exports = mongoose.model("User", userSchema);
 
 // const { getDb } = require("../util/database");
 
