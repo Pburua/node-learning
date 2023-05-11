@@ -20,26 +20,41 @@ app.set("views", "views");
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// app.use((req, res, next) => {
-//   User.findById("645b8e71a90b071ab0c1b34e")
-//     .then((user) => {
-//       req.user = new User(user.name, user.email, user.cart, user._id);
-//       next();
-//     })
-//     .catch((err) => {
-//       console.error(err);
-//     });
-// });
+app.use((req, res, next) => {
+  User.findById("645cb69ecefa97e9176a1e15")
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-// Listening
+// Setting up mongodb and listening
 
 mongoose
   .connect(MONGO_URL)
+  .then(() => {
+    return User.findOne();
+  })
+  .then((oldUser) => {
+    if (!oldUser) {
+      const user = new User({
+        name: "Pavel",
+        email: "test@mail.com",
+        cart: {
+          items: [],
+        },
+      });
+      return user.save();
+    }
+  })
   .then(() => {
     console.log("MongdoDB connection established.");
     app.listen(8080, () => {
