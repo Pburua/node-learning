@@ -17,7 +17,7 @@ const app = express();
 
 const store = new MongoDBStore({
   uri: MONGO_URL,
-  collection: 'sessions'
+  collection: "sessions",
 });
 
 app.set("view engine", "ejs");
@@ -27,12 +27,25 @@ app.set("views", "views");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
-app.use(session({
-  secret: 'my secret',
-  resave: false,
-  saveUninitialized: false,
-  store
-}));
+app.use(
+  session({
+    secret: "my secret",
+    resave: false,
+    saveUninitialized: false,
+    store,
+  })
+);
+
+app.use((req, res, next) => {
+  User.findById(req.session.user?._id)
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
