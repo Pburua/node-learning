@@ -3,10 +3,12 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 
 exports.getSignUp = (req, res, next) => {
+  let message = req.flash("error");
+  message = message.length > 0 ? message[0] : null;
   res.render("auth/signup", {
     pageTitle: "Sign Up",
     path: "/signup",
-    isAuthenticated: req.session.isAuthenticated,
+    errorMessage: message,
   });
 };
 
@@ -18,6 +20,7 @@ exports.postSignUp = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
+        req.flash("error", "Signup error: User already exists");
         res.redirect("/signup");
         throw "Signup error: User already exists.";
       }
@@ -42,10 +45,12 @@ exports.postSignUp = (req, res, next) => {
 };
 
 exports.getLogin = (req, res, next) => {
+  let message = req.flash("error");
+  message = message.length > 0 ? message[0] : null;
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
-    isAuthenticated: req.session.isAuthenticated,
+    errorMessage: message,
   });
 };
 
@@ -57,13 +62,13 @@ exports.postLogin = (req, res, next) => {
 
   User.findOne({ email })
     .then((user) => {
-      if (!user) throw 'Login error: Incorrect email.';
+      if (!user) throw "Login error: Incorrect email.";
 
       curUser = user;
-      return bcrypt.compare(password, user.password)
+      return bcrypt.compare(password, user.password);
     })
     .then((isPasswordValid) => {
-      if (!isPasswordValid) throw 'Login error: Incorrect password.';
+      if (!isPasswordValid) throw "Login error: Incorrect password.";
 
       req.session.user = curUser;
       req.session.isAuthenticated = true;
@@ -73,7 +78,8 @@ exports.postLogin = (req, res, next) => {
     })
     .catch((err) => {
       console.error(err);
-      res.redirect('/login');
+      req.flash("error", "Login error: Invalid email or password.");
+      res.redirect("/login");
     });
 };
 

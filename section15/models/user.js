@@ -75,7 +75,7 @@ userSchema.methods.addOrder = function () {
     })
     .then((cartItems) => {
       const newOrder = new Order({
-        user: { userId: this._id, name: this.name },
+        user: { userId: this._id, email: this.email },
         items: cartItems.map((cartItem) => {
           return { product: { ...cartItem.productId}, quantity: cartItem.quantity };
         }),

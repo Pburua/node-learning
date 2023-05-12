@@ -12,6 +12,9 @@
             action="/login" 
             method="POST"
         >
+            <% if (errorMessage) { %>
+                <div style="color: red;"><%= errorMessage %></div>
+            <% } %>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="form-control">
                 <label for="title">Email</label>
