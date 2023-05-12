@@ -58,21 +58,6 @@ app.use(errorController.get404);
 mongoose
   .connect(MONGO_URL)
   .then(() => {
-    return User.findOne();
-  })
-  .then((oldUser) => {
-    if (!oldUser) {
-      const user = new User({
-        name: "Pavel",
-        email: "test@mail.com",
-        cart: {
-          items: [],
-        },
-      });
-      return user.save();
-    }
-  })
-  .then(() => {
     console.log("MongdoDB connection established.");
     app.listen(8080, () => {
       console.log(`Server listening at port ${8080}`);
