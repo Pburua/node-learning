@@ -8,7 +8,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
-        isAuthenticated: req.isAuthenticated,
+        isAuthenticated: req.session.isAuthenticated,
       });
     })
     .catch((err) => {
@@ -25,11 +25,12 @@ exports.getProduct = (req, res, next) => {
         product,
         pageTitle: product.title,
         path: "/products",
-        isAuthenticated: req.isAuthenticated,
+        isAuthenticated: req.session.isAuthenticated,
       });
     })
     .catch((err) => {
       console.error(err);
+      res.status(404).send();
     });
 };
 
@@ -40,7 +41,7 @@ exports.getIndex = (req, res, next) => {
         prods: products,
         pageTitle: "Shop",
         path: "/",
-        isAuthenticated: req.isAuthenticated,
+        isAuthenticated: req.session.isAuthenticated,
       });
     })
     .catch((err) => {
@@ -49,7 +50,7 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  req.user
+  req.session.user
     .populate("cart.items.productId")
     .then((user) => {
       const cartProducts = user.cart.items;
@@ -57,7 +58,7 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         cartProducts,
-        isAuthenticated: req.isAuthenticated,
+        isAuthenticated: req.session.isAuthenticated,
       });
     })
     .catch((err) => {
@@ -70,7 +71,7 @@ exports.postCart = (req, res, next) => {
 
   Product.findById(productId)
     .then((product) => {
-      return req.user.addToCart(product);
+      return req.session.user.addToCart(product);
     })
     .then(() => {
       console.log("Cart updated successfully.");
@@ -84,7 +85,7 @@ exports.postCart = (req, res, next) => {
 exports.postDeleteCartItem = (req, res, next) => {
   const productId = req.body.productId;
 
-  req.user
+  req.session.user
     .deleteItemFromCart(productId)
     .then(() => {
       console.log("Cart item deleted successfully.");
@@ -96,7 +97,7 @@ exports.postDeleteCartItem = (req, res, next) => {
 };
 
 exports.postCreateOrder = (req, res, next) => {
-  req.user
+  req.session.user
     .addOrder()
     .then(() => {
       console.log("Order created successfully.");
@@ -108,13 +109,13 @@ exports.postCreateOrder = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  return Order.find({ "user.userId": req.user._id })
+  return Order.find({ "user.userId": req.session.user._id })
     .then((orders) => {
       res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
         orders,
-        isAuthenticated: req.isAuthenticated,
+        isAuthenticated: req.session.isAuthenticated,
       });
     })
     .catch((err) => {
@@ -126,6 +127,6 @@ exports.getCheckout = (req, res, next) => {
   res.render("shop/checkout", {
     path: "/checkout",
     pageTitle: "Checkout",
-    isAuthenticated: req.isAuthenticated,
+    isAuthenticated: req.session.isAuthenticated,
   });
 };
