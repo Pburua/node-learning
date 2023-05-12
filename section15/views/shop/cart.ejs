@@ -7,6 +7,7 @@
         <main>
             <% if (cartProducts.length > 0) { %>
                 <form action="/create-order" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <button type="submit" class="btn">Submit Order</button>
                 </form>
                 <ul>
@@ -19,6 +20,7 @@
                             </li>
                         </p>
                         <form action="/cart-delete-item" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                             <input 
                                 type="hidden" 
                                 name="productId" 

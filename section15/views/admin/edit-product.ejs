@@ -12,6 +12,7 @@
             action="<%= editMode ? "/admin/edit-product" : "/admin/add-product" %>" 
             method="POST"
         >
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="form-control">
                 <label for="title">Title</label>
                 <input 
