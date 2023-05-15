@@ -62,9 +62,14 @@ exports.postEditProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+  const curUserId = req.user._id;
 
   Product.findById(productId)
     .then((product) => {
+      if (product.userId.toString() !== curUserId.toString()) {
+        res.redirect("/admin/products");
+        throw "Authorization error: Operation not allowed.";
+      }
       product.title = title;
       product.price = price;
       product.description = description;
@@ -82,11 +87,17 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const productId = req.body.productId;
+  const curUserId = req.user._id;
 
-  Product.findByIdAndRemove(productId)
-    .then(() => {
-      console.log("Product deleted successfully.");
+  Product.deleteOne({ _id: productId, userId: curUserId })
+    .then((result) => {
       res.redirect("/admin/products");
+      
+      if (result) {
+        throw "Product deletion error: Product not found for user.";
+      }
+
+      console.log("Product deleted successfully.");
     })
     .catch((err) => {
       console.error(err);
@@ -94,7 +105,7 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  Product.find({ userId: req.user._id })
     // .select('title price -_id')
     // .populate('userId', 'name')
     .then((products) => {
