@@ -20,18 +20,20 @@ router.post(
             return Promise.reject("User already exists");
           }
         });
-      }),
+      })
+      .normalizeEmail(),
     body("password", "Please enter a valid password")
       .isLength({ min: 5 })
-      .isAlphanumeric(),
-    body("confirmPassword", "Please enter a valid password").custom(
-      (value, { req }) => {
+      .isAlphanumeric()
+      .trim(),
+    body("confirmPassword", "Please enter a valid password")
+      .custom((value, { req }) => {
         if (value !== req.body.password) {
           throw new Error("Passwords have to match");
         }
         return true;
-      }
-    ),
+      })
+      .trim(),
   ],
   authController.postSignUp
 );
@@ -41,11 +43,15 @@ router.get("/login", authController.getLogin);
 router.post(
   "/login",
   [
-    body("email").isEmail().withMessage("Please enter a valid email"),
+    body("email")
+      .isEmail()
+      .withMessage("Please enter a valid email")
+      .normalizeEmail(),
     body("password", "Please enter a valid password")
       .isLength({ min: 5 })
       .isAlphanumeric()
-      .withMessage(),
+      .withMessage()
+      .trim(),
   ],
   authController.postLogin
 );
