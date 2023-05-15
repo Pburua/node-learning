@@ -20,6 +20,9 @@
             <div class="form-control">
                 <label for="title">Email</label>
                 <input
+                    value="<%= oldInput.email %>"
+                    class="<%= validationErrors.find((e) => e.path === 'email') 
+                            ? 'invalid' : '' %>"
                     type="email" 
                     name="email" 
                     id="email"
@@ -28,6 +31,9 @@
             <div class="form-control">
                 <label for="title">Password</label>
                 <input
+                    value="<%= oldInput.password %>"
+                    class="<%= validationErrors.find((e) => e.path === 'password') 
+                        ? 'invalid' : '' %>"
                     type="password" 
                     name="password" 
                     id="password"

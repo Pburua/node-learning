@@ -86,6 +86,11 @@ exports.getLogin = (req, res, next) => {
     pageTitle: "Login",
     path: "/login",
     errorMessage: message,
+    oldInput: {
+      email: "",
+      password: "",
+    },
+    validationErrors: [],
   });
 };
 
@@ -100,6 +105,11 @@ exports.postLogin = (req, res, next) => {
       pageTitle: "Login",
       path: "/login",
       errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email,
+        password,
+      },
+      validationErrors: errors.array(),
     });
 
   let curUser;
@@ -122,8 +132,16 @@ exports.postLogin = (req, res, next) => {
     })
     .catch((err) => {
       console.error(err);
-      req.flash("error", "Invalid email or password.");
-      res.redirect("/login");
+      res.render("auth/login", {
+        pageTitle: "Login",
+        path: "/login",
+        errorMessage: "Invalid email or password.",
+        oldInput: {
+          email,
+          password,
+        },
+        validationErrors: [{ path: "email" }, { path: "password" }],
+      });
     });
 };
 
