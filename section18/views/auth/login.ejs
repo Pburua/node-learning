@@ -11,6 +11,7 @@
             class="product-form" 
             action="/login" 
             method="POST"
+            novalidate
         >
             <% if (errorMessage) { %>
                 <div style="color: red;"><%= errorMessage %></div>
