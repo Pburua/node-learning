@@ -11,12 +11,18 @@
             class="product-form" 
             action="<%= editMode ? "/admin/edit-product" : "/admin/add-product" %>" 
             method="POST"
+            novalidate
         >
+            <% if (errorMessage) { %>
+                <div style="color: red;"><%= errorMessage %></div>
+            <% } %>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="form-control">
                 <label for="title">Title</label>
                 <input 
-                    value="<%= editMode ? product.title : "" %>"
+                    value="<%= product.title %>"
+                    class="<%= validationErrors.find((e) => e.path === 'title') 
+                            ? 'invalid' : '' %>"
                     type="text" 
                     name="title" 
                     id="title"
@@ -25,7 +31,9 @@
             <div class="form-control">
                 <label for="imageUrl">Image URL</label>
                 <input 
-                    value="<%= editMode ? product.imageUrl : "" %>"
+                    value="<%= product.imageUrl %>"
+                    class="<%= validationErrors.find((e) => e.path === 'imageUrl') 
+                            ? 'invalid' : '' %>"
                     type="text" 
                     name="imageUrl" 
                     id="imageUrl"
@@ -34,7 +42,9 @@
             <div class="form-control">
                 <label for="price">Price</label>
                 <input 
-                    value="<%= editMode ? product.price : "" %>"
+                    value="<%= product.price %>"
+                    class="<%= validationErrors.find((e) => e.path === 'price') 
+                            ? 'invalid' : '' %>"
                     type="number" 
                     name="price" 
                     id="price" 
@@ -44,10 +54,12 @@
             <div class="form-control">
                 <label for="description">Description</label>
                 <textarea 
+                    class="<%= validationErrors.find((e) => e.path === 'description') 
+                        ? 'invalid' : '' %>"
                     name="description" 
                     id="description" 
                     rows="5"
-                ><%= editMode ? product.description : "" %></textarea>
+                ><%= product.description %></textarea>
             </div>
 
             <% if (editMode) { %>
