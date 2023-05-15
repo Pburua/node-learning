@@ -1,15 +1,18 @@
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
+const crypto = require("crypto");
 
 const User = require("../models/user");
 const { SENDGRID_API_KEY, FROM_EMAIL } = require("../env");
 
-const transporter = nodemailer.createTransport(sendgridTransport({
-  auth: {
-    api_key: SENDGRID_API_KEY,
-  }
-}));
+const transporter = nodemailer.createTransport(
+  sendgridTransport({
+    auth: {
+      api_key: SENDGRID_API_KEY,
+    },
+  })
+);
 
 exports.getSignUp = (req, res, next) => {
   let message = req.flash("error");
@@ -50,12 +53,12 @@ exports.postSignUp = (req, res, next) => {
       return transporter.sendMail({
         to: email,
         from: FROM_EMAIL,
-        subject: 'Signup succeeded!',
-        html: '<h1>You have successfully signed up</h1>'
+        subject: "Signup succeeded!",
+        html: "<h1>You have successfully signed up</h1>",
       });
     })
     .then(() => {
-      console.log('Signup email was sent successfully.')
+      console.log("Signup email was sent successfully.");
     })
     .catch((err) => {
       console.error(err);
@@ -105,4 +108,112 @@ exports.postLogout = (req, res, next) => {
   req.session.destroy(() => {
     res.redirect("/");
   });
+};
+
+exports.getResetPassword = (req, res, next) => {
+  let message = req.flash("error");
+  message = message.length > 0 ? message[0] : null;
+  res.render("auth/reset-password", {
+    pageTitle: "Reset password",
+    path: "/reset-password",
+    errorMessage: message,
+  });
+};
+
+exports.postResetPassword = (req, res, next) => {
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) res.redirect("/reset-password");
+
+    const token = buffer.toString("hex");
+    User.findOne({ email: req.body.email })
+      .then((user) => {
+        if (!user) {
+          req.flash("error", "No account with that email found");
+          res.redirect("/reset-password");
+          throw "Reset Password Error: No account with that email found";
+        }
+        user.resetToken = token;
+        user.resetTokenExpiration = Date.now() + 3600000;
+        user.save();
+      })
+      .then(() => {
+        res.redirect("/reset-password");
+        return transporter.sendMail({
+          to: req.body.email,
+          from: FROM_EMAIL,
+          subject: "Password reset",
+          html: `<h1>You requested a password reset:</h1>
+            <a href="http://localhost:8080/new-password/${token}">
+              Link for reset
+            </a>`,
+        });
+      })
+      .then(() => {
+        console.log("Reset password email was sent successfully.");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+};
+
+exports.getNewPassword = (req, res, next) => {
+  const curToken = req.params.token;
+
+  User.findOne({
+    resetToken: curToken,
+    resetTokenExpiration: { $gt: Date.now() },
+  })
+    .then((user) => {
+      if (!user) {
+        res.redirect("/login");
+        throw "New Password Error: User not found.";
+      }
+
+      let message = req.flash("error");
+      message = message.length > 0 ? message[0] : null;
+
+      res.render("auth/new-password", {
+        pageTitle: "New password",
+        path: "/new-password",
+        errorMessage: message,
+        passwordToken: curToken,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+exports.postNewPassword = (req, res, next) => {
+  const newPassword = req.body.password;
+  const passwordToken = req.body.passwordToken;
+  let curUser;
+
+  User.findOne({
+    resetToken: passwordToken,
+    resetTokenExpiration: { $gt: Date.now() },
+  })
+    .then((user) => {
+      if (!user) {
+        res.redirect("/login");
+        throw "New Password Error: User not found.";
+      }
+
+      curUser = user;
+      return bcrypt.hash(newPassword, 12);
+    })
+    .then((hashedPassword) => {
+      curUser.password = hashedPassword;
+      curUser.resetToken = undefined;
+      curUser.resetTokenExpiration = undefined;
+      return curUser.save();
+    })
+    .then(() => {
+      console.log("Password was changed successfully.");
+      res.redirect('/login');
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
