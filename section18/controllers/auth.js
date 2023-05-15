@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
 const crypto = require("crypto");
+const { validationResult } = require("express-validator");
 
 const User = require("../models/user");
 const { SENDGRID_API_KEY, FROM_EMAIL } = require("../env");
@@ -27,18 +28,20 @@ exports.getSignUp = (req, res, next) => {
 exports.postSignUp = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
 
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        req.flash("error", "Signup error: User already exists");
-        res.redirect("/signup");
-        throw "Signup error: User already exists.";
-      }
+  const errors = validationResult(req);
 
-      return bcrypt.hash(password, 12);
-    })
+  console.log("errors", errors);
+
+  if (!errors.isEmpty())
+    return res.status(422).render("auth/signup", {
+      pageTitle: "Sign Up",
+      path: "/signup",
+      errorMessage: errors.array()[0].msg,
+    });
+
+  bcrypt
+    .hash(password, 12)
     .then((hashedPassword) => {
       const newUser = new User({
         email,
@@ -211,7 +214,7 @@ exports.postNewPassword = (req, res, next) => {
     })
     .then(() => {
       console.log("Password was changed successfully.");
-      res.redirect('/login');
+      res.redirect("/login");
     })
     .catch((err) => {
       console.log(err);
