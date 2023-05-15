@@ -22,12 +22,19 @@ exports.getSignUp = (req, res, next) => {
     pageTitle: "Sign Up",
     path: "/signup",
     errorMessage: message,
+    oldInput: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationErrors: [],
   });
 };
 
 exports.postSignUp = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+  const confirmPassword = req.body.confirmPassword;
 
   const errors = validationResult(req);
 
@@ -36,6 +43,12 @@ exports.postSignUp = (req, res, next) => {
       pageTitle: "Sign Up",
       path: "/signup",
       errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email,
+        password,
+        confirmPassword,
+      },
+      validationErrors: errors.array(),
     });
 
   bcrypt

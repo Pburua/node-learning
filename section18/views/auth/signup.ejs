@@ -14,15 +14,36 @@
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="form-control">
                 <label for="email">E-Mail</label>
-                <input type="email" name="email" id="email">
+                <input 
+                    value="<%= oldInput.email %>" 
+                    class="<%= validationErrors.find((e) => e.path === 'email') 
+                        ? 'invalid' : '' %>"
+                    type="email" 
+                    name="email" 
+                    id="email"
+                >
             </div>
             <div class="form-control">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password">
+                <input 
+                    value="<%= oldInput.password %>" 
+                    class="<%= validationErrors.find((e) => e.path === 'password') 
+                            ? 'invalid' : '' %>"
+                    type="password" 
+                    name="password" 
+                    id="password"
+                >
             </div>
             <div class="form-control">
                 <label for="confirmPassword">Confirm Password</label>
-                <input type="password" name="confirmPassword" id="confirmPassword">
+                <input 
+                    value="<%= oldInput.confirmPassword %>" 
+                    class="<%= validationErrors.find((e) => e.path === 'confirmPassword') 
+                            ? 'invalid' : '' %>"
+                    type="password" 
+                    name="confirmPassword" 
+                    id="confirmPassword"
+                >
             </div>
             <button class="btn" type="submit">Sign Up</button>
         </form>
