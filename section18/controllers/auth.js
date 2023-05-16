@@ -75,7 +75,9 @@ exports.postSignUp = (req, res, next) => {
       console.log("Signup email was sent successfully.");
     })
     .catch((err) => {
-      console.error(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };
 
@@ -193,7 +195,9 @@ exports.postResetPassword = (req, res, next) => {
         console.log("Reset password email was sent successfully.");
       })
       .catch((err) => {
-        console.log(err);
+        const newError = new Error(err);
+        newError.httpStatusCode = 500;
+        return next(newError);
       });
   });
 };
@@ -222,7 +226,9 @@ exports.getNewPassword = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };
 
@@ -255,6 +261,8 @@ exports.postNewPassword = (req, res, next) => {
       res.redirect("/login");
     })
     .catch((err) => {
-      console.log(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };

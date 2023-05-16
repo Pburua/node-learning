@@ -3,15 +3,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
-const csrf = require('csurf');
-const flash = require('connect-flash');
+const csrf = require("csurf");
+const flash = require("connect-flash");
 
 const { MONGO_URL } = require("./env");
 const errorController = require("./controllers/error");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
-const User = require("./models/user");
+const setUser = require("./middleware/set-user");
+const errorHandler = require("./middleware/error-handler");
+const setRenderLocals = require("./middleware/set-render-locals");
 
 // Configuration
 
@@ -42,30 +44,20 @@ app.use(
 
 app.use(csrfProtection);
 
-app.use(flash())
+app.use(flash());
 
-app.use((req, res, next) => {
-  User.findById(req.session.user?._id)
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-});
+app.use(setRenderLocals);
 
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isAuthenticated;
-  res.locals.csrfToken = req.csrfToken();
-  next();
-})
+app.use(setUser);
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
+app.get("/500", errorController.get500);
 app.use(errorController.get404);
+
+app.use(errorHandler);
 
 // Setting up mongodb and listening
 

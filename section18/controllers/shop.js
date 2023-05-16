@@ -11,7 +11,9 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.error(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };
 
@@ -27,8 +29,9 @@ exports.getProduct = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.error(err);
-      res.status(404).send();
+      const newError = new Error(err);
+      newError.httpStatusCode = 404;
+      return next(newError);
     });
 };
 
@@ -42,7 +45,9 @@ exports.getIndex = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.error(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };
 
@@ -58,7 +63,9 @@ exports.getCart = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.error(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };
 
@@ -74,7 +81,9 @@ exports.postCart = (req, res, next) => {
       res.redirect("/cart");
     })
     .catch((err) => {
-      console.error(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };
 
@@ -88,7 +97,9 @@ exports.postDeleteCartItem = (req, res, next) => {
       res.redirect("/cart");
     })
     .catch((err) => {
-      console.error(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };
 
@@ -100,7 +111,9 @@ exports.postCreateOrder = (req, res, next) => {
       res.redirect("/orders");
     })
     .catch((err) => {
-      console.error(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };
 
@@ -114,7 +127,9 @@ exports.getOrders = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.error(err);
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
     });
 };
 
