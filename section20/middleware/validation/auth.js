@@ -1,5 +1,7 @@
 const { body } = require("express-validator");
 
+const User = require("../../models/user");
+
 const postLoginValidation = [
   body("email")
     .isEmail()

@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 const Order = require("../models/order");
 const Product = require("../models/product");
 
@@ -41,7 +44,7 @@ exports.getIndex = (req, res, next) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
-        path: "/"
+        path: "/",
       });
     })
     .catch((err) => {
@@ -129,6 +132,43 @@ exports.getOrders = (req, res, next) => {
     .catch((err) => {
       const newError = new Error(err);
       newError.httpStatusCode = 500;
+      return next(newError);
+    });
+};
+
+exports.getInvoice = (req, res, next) => {
+  const orderId = req.params.orderId;
+
+  Order.findById(orderId)
+    .then((order) => {
+      if (!order) {
+        const newError = new Error("Get Invoice Error: Order not found.");
+        newError.httpStatusCode = 404;
+        return next(newError);
+      }
+      if (order.user.userId.toString() !== req.user._id.toString()) {
+        const newError = new Error("Get Invoice Error: Unauthorized.");
+        newError.httpStatusCode = 401;
+        return next(newError);
+      }
+
+      const invoiceFileName = "invoice-" + orderId + ".pdf";
+
+      const invoicePath = path.join("data", "invoices", invoiceFileName);
+
+      fs.readFile(invoicePath, (err, data) => {
+        if (err) return next(err);
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${invoiceFileName}"`
+        );
+        res.send(data);
+      });
+    })
+    .catch((err) => {
+      const newError = new Error(err);
+      newError.httpStatusCode = 404;
       return next(newError);
     });
 };
