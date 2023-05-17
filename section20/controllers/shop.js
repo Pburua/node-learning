@@ -5,13 +5,32 @@ const PDFDocument = require("pdfkit");
 const Order = require("../models/order");
 const Product = require("../models/product");
 
+const ITEMS_PER_PAGE = 2;
+
 exports.getProducts = (req, res, next) => {
+  const page = +req.query.page || 1;
+  let productsCount = 0;
+
   Product.find()
+    .countDocuments()
+    .then((count) => {
+      productsCount = count;
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((products) => {
       res.render("shop/product-list", {
         prods: products,
-        pageTitle: "All Products",
+        pageTitle: "Products",
         path: "/products",
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < productsCount,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        lastPage: Math.ceil(productsCount / ITEMS_PER_PAGE),
+        firstPage: 1,
       });
     })
     .catch((err) => {
@@ -40,12 +59,29 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
+  const page = +req.query.page || 1;
+  let productsCount = 0;
+
   Product.find()
+    .countDocuments()
+    .then((count) => {
+      productsCount = count;
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((products) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
         path: "/",
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < productsCount,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+        lastPage: Math.ceil(productsCount / ITEMS_PER_PAGE),
+        firstPage: 1,
       });
     })
     .catch((err) => {

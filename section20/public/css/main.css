@@ -241,3 +241,11 @@ form {
     display: none;
   }
 }
+
+.pagination a {
+  color: blue;
+}
+
+.pagination a.active {
+  color: green;
+}
