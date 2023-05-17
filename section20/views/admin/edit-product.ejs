@@ -12,6 +12,7 @@
             action="<%= editMode ? "/admin/edit-product" : "/admin/add-product" %>" 
             method="POST"
             novalidate
+            enctype="multipart/form-data"
         >
             <% if (errorMessage) { %>
                 <div style="color: red;"><%= errorMessage %></div>
@@ -28,7 +29,7 @@
                     id="title"
                 >
             </div>
-            <div class="form-control">
+            <!-- <div class="form-control">
                 <label for="imageUrl">Image URL</label>
                 <input 
                     value="<%= product.imageUrl %>"
@@ -37,6 +38,14 @@
                     type="text" 
                     name="imageUrl" 
                     id="imageUrl"
+                >
+            </div> -->
+            <div class="form-control">
+                <label for="image">Image</label>
+                <input
+                    type="file" 
+                    name="image" 
+                    id="image"
                 >
             </div>
             <div class="form-control">

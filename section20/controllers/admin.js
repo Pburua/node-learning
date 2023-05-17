@@ -11,7 +11,6 @@ exports.getAddProduct = (req, res, next) => {
     errorMessage: "",
     product: {
       title: "",
-      imageUrl: "",
       price: "",
       description: "",
     },
@@ -21,9 +20,26 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+  const image = req.file;
+
+  if (!image) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      editMode: false,
+      hasError: true,
+      errorMessage:
+        "Attached file does not exist or has unacceptable extension",
+      product: {
+        title,
+        price,
+        description,
+      },
+      validationErrors: [],
+    });
+  }
 
   const errors = validationResult(req);
 
@@ -36,12 +52,13 @@ exports.postAddProduct = (req, res, next) => {
       errorMessage: errors.array()[0].msg,
       product: {
         title,
-        imageUrl,
         price,
         description,
       },
       validationErrors: errors.array(),
     });
+
+  const imageUrl = image.path;
 
   const newProduct = new Product({
     title,
@@ -94,10 +111,10 @@ exports.getEditProduct = (req, res, next) => {
 exports.postEditProduct = (req, res, next) => {
   const productId = req.body.productId;
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
   const curUserId = req.user._id;
+  const image = req.file;
 
   const errors = validationResult(req);
 
@@ -110,7 +127,6 @@ exports.postEditProduct = (req, res, next) => {
       errorMessage: errors.array()[0].msg,
       product: {
         title,
-        imageUrl,
         price,
         description,
         _id: productId,
@@ -127,7 +143,9 @@ exports.postEditProduct = (req, res, next) => {
       product.title = title;
       product.price = price;
       product.description = description;
-      product.imageUrl = imageUrl;
+      if (image) {
+        product.imageUrl = image.path;
+      }
       return product.save();
     })
     .then(() => {
