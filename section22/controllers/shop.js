@@ -1,9 +1,13 @@
 const fs = require("fs");
 const path = require("path");
 const PDFDocument = require("pdfkit");
+const stripeSetupFunc = require("stripe");
 
 const Order = require("../models/order");
 const Product = require("../models/product");
+const { STRIPE_SECRET_KEY } = require("../env");
+
+const stripe = stripeSetupFunc(STRIPE_SECRET_KEY);
 
 const ITEMS_PER_PAGE = 2;
 
@@ -143,7 +147,7 @@ exports.postDeleteCartItem = (req, res, next) => {
     });
 };
 
-exports.postCreateOrder = (req, res, next) => {
+exports.createOrder = (req, res, next) => {
   req.user
     .addOrder()
     .then(() => {
@@ -228,8 +232,49 @@ exports.getInvoice = (req, res, next) => {
 };
 
 exports.getCheckout = (req, res, next) => {
-  res.render("shop/checkout", {
-    path: "/checkout",
-    pageTitle: "Checkout",
-  });
+  let cartProducts;
+  let totalSum = 0;
+
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
+      cartProducts = user.cart.items;
+      cartProducts.forEach((cartProduct) => {
+        totalSum += cartProduct.quantity * cartProduct.productId.price;
+      });
+      return stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ["card"],
+        line_items: cartProducts.map((cartProduct) => {
+          return {
+            price_data: {
+              product_data: {
+                name: cartProduct.productId.title,
+                description: cartProduct.productId.description,
+              },
+              unit_amount: cartProduct.productId.price * 100,
+              currency: "usd",
+            },
+            quantity: cartProduct.quantity,
+          };
+        }),
+        success_url:
+          req.protocol + "://" + req.get("host") + "/checkout/success",
+        cancel_url: req.protocol + "://" + req.get("host") + "/checkout/cancel",
+      });
+    })
+    .then((stripeSession) => {
+      res.render("shop/checkout", {
+        path: "/checkout",
+        pageTitle: "Checkout",
+        cartProducts,
+        totalSum,
+        stripeSessionId: stripeSession.id,
+      });
+    })
+    .catch((err) => {
+      const newError = new Error(err);
+      newError.httpStatusCode = 500;
+      return next(newError);
+    });
 };

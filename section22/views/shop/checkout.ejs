@@ -6,11 +6,6 @@
 
         <main>
             <% if (cartProducts.length > 0) { %>
-                <a class="btn" href="/checkout">Order now!</a>
-                <!-- <form action="/create-order" method="POST">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <button type="submit" class="btn">Submit Order</button>
-                </form> -->
                 <ul>
                     <% cartProducts.forEach((cartProduct) => { %>
                         <% if (cartProduct.productId && cartProduct.quantity) { %>
@@ -20,15 +15,6 @@
                                 (<%= cartProduct.quantity %>)
                             </li>
                         </p>
-                        <form action="/cart-delete-item" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input 
-                                type="hidden" 
-                                name="productId" 
-                                value="<%= cartProduct.productId._id %>"
-                            >
-                            <button type="submit" class="btn">Delete</button>
-                        </form>
                         <% } else { %>
                             <p>
                                 <li>
@@ -38,6 +24,20 @@
                         <% } %>
                     <% }) %>
                 </ul>
+                <div>Total: <%= totalSum %></div>
+                <div>
+                    <button id="order-btn" class="btn">Order!</button>
+                    <script src="https://js.stripe.com/v3/"></script>
+                    <script>
+                        const stripe = Stripe('pk_test_51N94VJDizlUhKKRBVlCmjnKoi3qog390nDBzDFJcGUlrgA2rCx41qQ75GAlFl0js55kRBMTeNfuPHSloxbiavHXq00u0R5ZAMV');
+                        const orderBtn = document.getElementById("order-btn");
+                        orderBtn.addEventListener("click", () => {
+                            stripe.redirectToCheckout({
+                                sessionId: '<%= stripeSessionId %>'
+                            });
+                        });
+                    </script>
+                </div>
             <% } else { %>
                 <h1>No products in the cart</h1>
             <% } %>
