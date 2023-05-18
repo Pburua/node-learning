@@ -161,8 +161,8 @@ exports.postEditProduct = (req, res, next) => {
     });
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-  const productId = req.body.productId;
+exports.deleteProduct = (req, res, next) => {
+  const productId = req.params.productId;
   const curUserId = req.user._id;
 
   Product.findById(productId)
@@ -175,7 +175,7 @@ exports.postDeleteProduct = (req, res, next) => {
       return Product.deleteOne({ _id: productId, userId: curUserId });
     })
     .then((result) => {
-      res.redirect("/admin/products");
+      res.status(200).json({message: 'Product deleted successfully.'});
 
       if (!result) {
         throw new Error("Product deletion error: Product not found for user.");
@@ -184,7 +184,7 @@ exports.postDeleteProduct = (req, res, next) => {
       console.log("Product deleted successfully.");
     })
     .catch((err) => {
-      return next(err);
+      res.status(500).json({message: 'Product deletion error: Product not found for user.'});
     });
 };
 

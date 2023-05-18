@@ -33,12 +33,9 @@
                                     >
                                         Edit
                                     </a>
-                                    <form action="/admin/delete-product" method="POST">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <input type="hidden" value="<%= product._id %>" name="productId">
-                                        <button class="btn" type="submit">Delete</button>
-                                    </form>
-
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <input type="hidden" value="<%= product._id %>" name="productId">
+                                    <button class="btn" type="button" onclick="deleteProduct(this)">Delete</button>
                                 </div>
                             </article>
                             <% } %>
@@ -48,3 +45,5 @@
                         <% } %>
             </main>
             <%- include('../includes/end.ejs') %>
+
+            <script src="/js/admin.js"></script>
