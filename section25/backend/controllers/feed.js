@@ -25,10 +25,9 @@ const createPost = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res.status(422).json({
-      message: "Validation error.",
-      errors: errors.array(),
-    });
+    const newError = new Error("Validation error.");
+    newError.statusCode = 422;
+    throw newError;
   }
 
   const newPost = new Post({
@@ -49,7 +48,7 @@ const createPost = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.error(err);
+      next(err);
     });
 };
 

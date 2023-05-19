@@ -1,14 +1,18 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path");
 
 const feedRouter = require("./routes/feed");
 const { MONGO_URL } = require("./env");
+const errorHandler = require("./middleware/error-handler");
 
 // Configuration
 
 const app = express();
 
 // Middleware
+
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use(express.json());
 
@@ -20,6 +24,8 @@ app.use((req, res, next) => {
 });
 
 app.use("/feed", feedRouter);
+
+app.use(errorHandler);
 
 // Startup
 
