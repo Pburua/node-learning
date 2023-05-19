@@ -122,11 +122,35 @@ const updatePost = (req, res, next) => {
     });
 };
 
+const deletePost = (req, res, next) => {
+  const postId = req.params.postId;
+
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const newError = new Error("Not found.");
+        newError.statusCode = 404;
+        throw newError;
+      }
+      fileHelper.deleteFile(path.join(__dirname, "..", post.imageUrl));
+      return Post.findByIdAndRemove(postId);
+    })
+    .then(() => {
+      res.status(200).json({
+        message: "Post deleted successfully",
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 const feedController = {
   getPosts,
   getPost,
   createPost,
   updatePost,
+  deletePost,
 };
 
 module.exports = feedController;

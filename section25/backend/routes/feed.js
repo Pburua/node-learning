@@ -20,4 +20,6 @@ feedRouter.put(
   feedController.updatePost
 );
 
+feedRouter.delete("/post/:postId", feedController.deletePost);
+
 module.exports = feedRouter;
