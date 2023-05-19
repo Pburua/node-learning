@@ -1,5 +1,7 @@
 const { validationResult } = require("express-validator");
 
+const Post = require("../models/post");
+
 const getPosts = (req, res, next) => {
   res.status(200).json({
     posts: [
@@ -23,27 +25,32 @@ const createPost = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res
-      .status(422)
-      .json({
-        message: "Validation error.",
-        errors: errors.array(),
-      });
+    return res.status(422).json({
+      message: "Validation error.",
+      errors: errors.array(),
+    });
   }
 
-  res.status(201).json({
-    message: "Post created successfully",
-    post: {
-      _id: new Date().getTime(),
-      title,
-      content,
-      imageUrl: "images/Signature1.png",
-      creator: {
-        name: "Flowey",
-      },
-      createdAt: new Date(),
+  const newPost = new Post({
+    title,
+    content,
+    imageUrl: "images/Signature1.png",
+    creator: {
+      name: "Flowey",
     },
   });
+
+  newPost
+    .save()
+    .then((result) => {
+      res.status(201).json({
+        message: "Post created successfully",
+        post: result,
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 };
 
 const feedController = {
