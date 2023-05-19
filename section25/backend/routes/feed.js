@@ -7,6 +7,8 @@ const feedRouter = express.Router();
 
 feedRouter.get("/posts", feedController.getPosts);
 
+feedRouter.get("/post/:postId", feedController.getPost);
+
 feedRouter.post("/post", createPostValidation, feedController.createPost);
 
 module.exports = feedRouter;

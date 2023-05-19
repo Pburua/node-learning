@@ -3,19 +3,30 @@ const { validationResult } = require("express-validator");
 const Post = require("../models/post");
 
 const getPosts = (req, res, next) => {
-  res.status(200).json({
-    posts: [
-      {
-        title: "Undertale post",
-        content: "Hello! I am Flowey the flower!",
-        imageUrl: "images/Signature1.png",
-        creator: {
-          name: "Flowey",
-        },
-        createdAt: new Date(),
-      },
-    ],
-  });
+  Post.find()
+    .then((posts) => {
+      res.status(200).json({ posts });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+const getPost = (req, res, next) => {
+  const postId = req.params.postId;
+
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const newError = new Error("Not found.");
+        newError.statusCode = 404;
+        throw newError;
+      }
+      res.status(200).json({ post });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const createPost = (req, res, next) => {
@@ -54,6 +65,7 @@ const createPost = (req, res, next) => {
 
 const feedController = {
   getPosts,
+  getPost,
   createPost,
 };
 
