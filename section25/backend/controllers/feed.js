@@ -41,10 +41,18 @@ const createPost = (req, res, next) => {
     throw newError;
   }
 
+  if (!req.file) {
+    const newError = new Error("No image provided.");
+    newError.statusCode = 422;
+    throw newError;
+  }
+
+  const imageUrl = req.file.path.replace("\\" ,"/");
+
   const newPost = new Post({
     title,
     content,
-    imageUrl: "images/Signature1.png",
+    imageUrl,
     creator: {
       name: "Flowey",
     },

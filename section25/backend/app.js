@@ -5,16 +5,40 @@ const path = require("path");
 const feedRouter = require("./routes/feed");
 const { MONGO_URL } = require("./env");
 const errorHandler = require("./middleware/error-handler");
+const multer = require("multer");
 
 // Configuration
 
 const app = express();
+
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().getTime() + "-" + file.originalname);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === "image/png" || "image/jpg" || "image/jpeg") {
+    return cb(null, true);
+  }
+  cb(null, false);
+};
 
 // Middleware
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use(express.json());
+
+app.use(
+  multer({
+    storage: fileStorage,
+    fileFilter,
+  }).single("image")
+);
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
