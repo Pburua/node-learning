@@ -5,9 +5,21 @@ const Post = require("../models/post");
 const fileHelper = require("../util/file-helper");
 
 const getPosts = (req, res, next) => {
+  const curPage = req.query.page || 1;
+  const itemsPerPage = 2;
+
+  let totalItems;
+
   Post.find()
+    .countDocuments()
+    .then((postCount) => {
+      totalItems = postCount;
+      return Post.find()
+        .skip((curPage - 1) * itemsPerPage)
+        .limit(itemsPerPage);
+    })
     .then((posts) => {
-      res.status(200).json({ posts });
+      res.status(200).json({ posts, totalItems });
     })
     .catch((err) => {
       next(err);
