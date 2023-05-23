@@ -1,7 +1,9 @@
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
+const { JWT_SECRET } = require("../env");
 
 const signup = (req, res, next) => {
   const errors = validationResult(req);
@@ -33,8 +35,48 @@ const signup = (req, res, next) => {
     });
 };
 
+const login = (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  let loadedUser;
+
+  return User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        const newError = new Error("Invalid email.");
+        newError.statusCode = 422;
+        throw newError;
+      }
+      loadedUser = user;
+      return bcrypt.compare(password, user.password);
+    })
+    .then((isEqual) => {
+      if (!isEqual) {
+        const newError = new Error("Invalid password.");
+        newError.statusCode = 422;
+        throw newError;
+      }
+      const token = jwt.sign(
+        {
+          userId: loadedUser._id.toString(),
+          email: loadedUser.email,
+        },
+        JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+      res.status(200).json({
+        token,
+        userId: loadedUser._id.toString(),
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 const authController = {
   signup,
+  login,
 };
 
 module.exports = authController;

@@ -5,10 +5,11 @@ const {
   createPostValidation,
   updatePostValidation,
 } = require("../middleware/validation/feed");
+const isAuth = require("../middleware/is-auth");
 
 const feedRouter = express.Router();
 
-feedRouter.get("/posts", feedController.getPosts);
+feedRouter.get("/posts", isAuth, feedController.getPosts);
 
 feedRouter.get("/post/:postId", feedController.getPost);
 
