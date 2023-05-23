@@ -11,16 +11,22 @@ const feedRouter = express.Router();
 
 feedRouter.get("/posts", isAuth, feedController.getPosts);
 
-feedRouter.get("/post/:postId", feedController.getPost);
+feedRouter.get("/post/:postId", isAuth, feedController.getPost);
 
-feedRouter.post("/post", createPostValidation, feedController.createPost);
+feedRouter.post(
+  "/post",
+  isAuth,
+  createPostValidation,
+  feedController.createPost
+);
 
 feedRouter.put(
   "/post/:postId",
+  isAuth,
   updatePostValidation,
   feedController.updatePost
 );
 
-feedRouter.delete("/post/:postId", feedController.deletePost);
+feedRouter.delete("/post/:postId", isAuth, feedController.deletePost);
 
 module.exports = feedRouter;

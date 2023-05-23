@@ -2,6 +2,7 @@ const path = require("path");
 const { validationResult } = require("express-validator");
 
 const Post = require("../models/post");
+const User = require("../models/user");
 const fileHelper = require("../util/file-helper");
 
 const getPosts = (req, res, next) => {
@@ -67,17 +68,26 @@ const createPost = (req, res, next) => {
     title,
     content,
     imageUrl,
-    creator: {
-      name: "Flowey",
-    },
+    creator: req.userId,
   });
+
+  let creator;
 
   newPost
     .save()
-    .then((result) => {
+    .then(() => {
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      creator = user;
+      user.posts.push(newPost);
+      return user.save();
+    })
+    .then(() => {
       res.status(200).json({
         message: "Post created successfully",
-        post: result,
+        post: newPost,
+        creator: { _id: creator._id, name: creator.name },
       });
     })
     .catch((err) => {
@@ -115,6 +125,12 @@ const updatePost = (req, res, next) => {
         throw newError;
       }
 
+      if (post.creator.toString() !== req.userId) {
+        const newError = new Error("Not authorized.");
+        newError.statusCode = 403;
+        throw newError;
+      }
+
       if (imageUrl !== post.imageUrl)
         fileHelper.deleteFile(path.join(__dirname, "..", post.imageUrl));
 
@@ -144,8 +160,22 @@ const deletePost = (req, res, next) => {
         newError.statusCode = 404;
         throw newError;
       }
+
+      if (post.creator.toString() !== req.userId) {
+        const newError = new Error("Not authorized.");
+        newError.statusCode = 403;
+        throw newError;
+      }
+
       fileHelper.deleteFile(path.join(__dirname, "..", post.imageUrl));
       return Post.findByIdAndRemove(postId);
+    })
+    .then(() => {
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      user.posts.pull(postId);
+      return user.save();
     })
     .then(() => {
       res.status(200).json({
