@@ -59,9 +59,18 @@ mongoose
   .connect(MONGO_URL)
   .then(() => {
     console.log(`Mongodb connection established.`);
-    app.listen(8080, () => {
-      console.log(`Server listening on port ${8080}`);
+    return new Promise((resolve, reject) => {
+      app.listen(8080, () => {
+        return resolve(8080);
+      });
+
+      // setTimeout(() => {
+      //   resolve(8080);
+      // }, 2000)
     });
+  })
+  .then((port) => {
+    console.log(`Server listening on port ${port}`);
   })
   .catch((err) => {
     console.error(err);
