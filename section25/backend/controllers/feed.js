@@ -187,12 +187,64 @@ const deletePost = (req, res, next) => {
     });
 };
 
+const getStatus = (req, res, next) => {
+  User.findById(req.userId)
+    .then((user) => {
+      if (!user) {
+        const newError = new Error("Not found.");
+        newError.statusCode = 404;
+        throw newError;
+      }
+      res.status(200).json({
+        status: user.status,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
+const updateStatus = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const newError = new Error("Validation error.");
+    newError.statusCode = 422;
+    newError.data = errors.array();
+    throw newError;
+  }
+
+  const status = req.body.status;
+
+  User.findById(req.userId)
+    .then((user) => {
+      if (!user) {
+        const newError = new Error("Not found.");
+        newError.statusCode = 404;
+        throw newError;
+      }
+
+      user.status = status;
+      return user.save();
+    })
+    .then(() => {
+      res.status(200).json({
+        message: 'Status was updated successfully.',
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
 const feedController = {
   getPosts,
   getPost,
   createPost,
   updatePost,
   deletePost,
+  getStatus,
+  updateStatus,
 };
 
 module.exports = feedController;

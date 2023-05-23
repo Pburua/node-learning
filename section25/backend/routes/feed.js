@@ -4,6 +4,7 @@ const feedController = require("../controllers/feed");
 const {
   createPostValidation,
   updatePostValidation,
+  updateStatusValidation,
 } = require("../middleware/validation/feed");
 const isAuth = require("../middleware/is-auth");
 
@@ -28,5 +29,14 @@ feedRouter.put(
 );
 
 feedRouter.delete("/post/:postId", isAuth, feedController.deletePost);
+
+feedRouter.get("/status", isAuth, feedController.getStatus);
+
+feedRouter.put(
+  "/status",
+  isAuth,
+  updateStatusValidation,
+  feedController.updateStatus
+);
 
 module.exports = feedRouter;

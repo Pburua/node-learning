@@ -10,4 +10,10 @@ const updatePostValidation = [
   body("content").trim().isLength({ min: 5 }),
 ];
 
-module.exports = { createPostValidation, updatePostValidation };
+const updateStatusValidation = [body("status").trim().isLength({ min: 1 })];
+
+module.exports = {
+  createPostValidation,
+  updatePostValidation,
+  updateStatusValidation,
+};
