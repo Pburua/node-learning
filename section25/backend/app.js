@@ -6,6 +6,7 @@ const feedRouter = require("./routes/feed");
 const { MONGO_URL } = require("./env");
 const errorHandler = require("./middleware/error-handler");
 const multer = require("multer");
+const authRouter = require("./routes/auth");
 
 // Configuration
 
@@ -48,6 +49,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/feed", feedRouter);
+app.use("/auth", authRouter);
 
 app.use(errorHandler);
 
