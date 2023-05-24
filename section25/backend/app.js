@@ -1,13 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
-const { Server: SocketServer } = require("socket.io");
 
 const feedRouter = require("./routes/feed");
 const { MONGO_URL } = require("./env");
 const errorHandler = require("./middleware/error-handler");
 const multer = require("multer");
 const authRouter = require("./routes/auth");
+const socketHelper = require("./util/socket-helper");
 
 // Configuration
 
@@ -67,15 +67,12 @@ mongoose
     });
   })
   .then(({ expressServer, port }) => {
-    const socketio = new SocketServer(expressServer, {
-      cors: {
-        origin: "http://localhost:3000"
-      }
-    });
+    console.log(`Server listening on port ${port}`);
+
+    const socketio = socketHelper.init(expressServer);
     socketio.on("connection", (socket) => {
       console.log("Socket client connected.");
     });
-    console.log(`Server listening on port ${port}`);
   })
   .catch((err) => {
     console.error(err);
