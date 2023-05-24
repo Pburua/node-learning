@@ -46,6 +46,10 @@ class Feed extends Component {
     socket.on('posts', ({ action, post }) => {
       if (action === 'create') {
         this.addPost(post);
+      } else if (action === 'update') {
+        this.updatePost(post);
+      } else if (action === 'delete') {
+        this.loadPosts();
       }
     });
   }
@@ -64,6 +68,19 @@ class Feed extends Component {
         totalPosts: prevState.totalPosts + 1
       };
     });    
+  }
+
+  updatePost = (post) => {
+    this.setState(prevState => {
+      const updatedPosts = [...prevState.posts];
+      const updatedPostIndex = updatedPosts.findIndex(p => p._id === post._id);
+      if (updatedPostIndex > -1) {
+        updatedPosts[updatedPostIndex] = post;
+      }
+      return {
+        posts: updatedPosts
+      };
+    });
   }
 
   loadPosts = direction => {
@@ -186,15 +203,7 @@ class Feed extends Component {
           createdAt: resData.post.createdAt
         };
         this.setState(prevState => {
-          let updatedPosts = [...prevState.posts];
-          if (prevState.editPost) {
-            const postIndex = prevState.posts.findIndex(
-              p => p._id === prevState.editPost._id
-            );
-            updatedPosts[postIndex] = post;
-          }
           return {
-            posts: updatedPosts,
             isEditing: false,
             editPost: null,
             editLoading: false
@@ -231,11 +240,12 @@ class Feed extends Component {
         return res.json();
       })
       .then(resData => {
-        console.log(resData);
-        this.setState(prevState => {
-          const updatedPosts = prevState.posts.filter(p => p._id !== postId);
-          return { posts: updatedPosts, postsLoading: false };
-        });
+        this.loadPosts();
+        // console.log(resData);
+        // this.setState(prevState => {
+        //   const updatedPosts = prevState.posts.filter(p => p._id !== postId);
+        //   return { posts: updatedPosts, postsLoading: false };
+        // });
       })
       .catch(err => {
         console.log(err);

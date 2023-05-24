@@ -120,7 +120,7 @@ const updatePost = async (req, res, next) => {
   }
 
   try {
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate("creator");
 
     if (!post) {
       const newError = new Error("Not found.");
@@ -128,7 +128,7 @@ const updatePost = async (req, res, next) => {
       throw newError;
     }
 
-    if (post.creator.toString() !== req.userId) {
+    if (post.creator._id.toString() !== req.userId) {
       const newError = new Error("Not authorized.");
       newError.statusCode = 403;
       throw newError;
@@ -142,6 +142,11 @@ const updatePost = async (req, res, next) => {
     post.imageUrl = imageUrl;
 
     const result = await post.save();
+
+    socketHelper.getIO().emit("posts", {
+      action: "update",
+      post: result,
+    });
 
     res.status(200).json({
       message: "Post updated successfully",
@@ -179,6 +184,11 @@ const deletePost = async (req, res, next) => {
     user.posts.pull(postId);
 
     await user.save();
+
+    socketHelper.getIO().emit("posts", {
+      action: "delete",
+      postId,
+    });
 
     res.status(200).json({
       message: "Post deleted successfully",
