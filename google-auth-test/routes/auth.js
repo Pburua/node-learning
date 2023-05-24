@@ -8,6 +8,8 @@ authRouter.get("/", authController.getLoginPage);
 
 authRouter.get("/welcome", authController.getWelcomePage);
 
-authRouter.post("/callback/success", authController.handleSuccessCallback);
+authRouter.get("/login", authController.login);
+
+authRouter.get("/callback/success", authController.handleSuccessCallback);
 
 module.exports = authRouter;

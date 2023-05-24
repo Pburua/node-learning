@@ -1,0 +1,7 @@
+GOOGLE_CLIENT_ID = "";
+GOODLE_CLIENT_SECRET = "";
+
+module.exports = {
+  GOOGLE_CLIENT_ID,
+  GOODLE_CLIENT_SECRET,
+};
