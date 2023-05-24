@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
+const { Server: SocketServer } = require("socket.io");
 
 const feedRouter = require("./routes/feed");
 const { MONGO_URL } = require("./env");
@@ -60,16 +61,20 @@ mongoose
   .then(() => {
     console.log(`Mongodb connection established.`);
     return new Promise((resolve, reject) => {
-      app.listen(8080, () => {
-        return resolve(8080);
+      const expressServer = app.listen(8080, () => {
+        return resolve({ expressServer, port: 8080 });
       });
-
-      // setTimeout(() => {
-      //   resolve(8080);
-      // }, 2000)
     });
   })
-  .then((port) => {
+  .then(({ expressServer, port }) => {
+    const socketio = new SocketServer(expressServer, {
+      cors: {
+        origin: "http://localhost:3000"
+      }
+    });
+    socketio.on("connection", (socket) => {
+      console.log("Socket client connected.");
+    });
     console.log(`Server listening on port ${port}`);
   })
   .catch((err) => {
