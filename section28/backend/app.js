@@ -1,13 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
+const multer = require("multer");
+const { graphqlHTTP } = require("express-graphql");
 
-const feedRouter = require("./routes/feed");
 const { MONGO_URL } = require("./env");
 const errorHandler = require("./middleware/error-handler");
-const multer = require("multer");
-const authRouter = require("./routes/auth");
-const socketHelper = require("./util/socket-helper");
+const graphqlSchema = require("./graphql/schema");
+const graphqlResolver = require("./graphql/resolvers");
 
 // Configuration
 
@@ -49,8 +49,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/feed", feedRouter);
-app.use("/auth", authRouter);
+app.use('/graphql', graphqlHTTP({
+  schema: graphqlSchema, 
+  rootValue: graphqlResolver
+}))
 
 app.use(errorHandler);
 
@@ -61,18 +63,13 @@ mongoose
   .then(() => {
     console.log(`Mongodb connection established.`);
     return new Promise((resolve, reject) => {
-      const expressServer = app.listen(8080, () => {
-        return resolve({ expressServer, port: 8080 });
+      app.listen(8080, () => {
+        return resolve(8080);
       });
     });
   })
-  .then(({ expressServer, port }) => {
+  .then((port) => {
     console.log(`Server listening on port ${port}`);
-
-    const socketio = socketHelper.init(expressServer);
-    socketio.on("connection", (socket) => {
-      console.log("Socket client connected.");
-    });
   })
   .catch((err) => {
     console.error(err);
