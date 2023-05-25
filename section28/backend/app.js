@@ -68,7 +68,7 @@ app.use(
       return {
         message,
         data,
-        statusCode,
+        status: statusCode,
       };
     },
   })
