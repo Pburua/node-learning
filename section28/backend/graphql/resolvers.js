@@ -34,6 +34,7 @@ const graphqlResolver = {
 
     if (existingUser) {
       const newError = new Error("User already exists.");
+      newError.statusCode = 422;
       throw newError;
     }
 
