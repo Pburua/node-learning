@@ -7,7 +7,7 @@
     <title>Goodle Auth Challenge</title>
   </head>
   <body>
-    <h1>Welcome page</h1>
+    <h1>Login page</h1>
     <nav>
       <p>
         <a href="/">Login page</a>
@@ -15,9 +15,15 @@
       <p>
         <a href="/welcome">Welcome page</a>
       </p>
+      <% if (!isAuthenticated) { %>
+      <p>
+        <a href="/login">Login with Google</a>
+      </p>
+      <% } else { %>
       <p>
         <a href="/logout">Logout</a>
       </p>
+      <% } %>
     </nav>
   </body>
 </html>

@@ -1,12 +1,15 @@
 const path = require("path");
 
 const getLoginPage = (req, res, next) => {
-  console.log('req.user', req.user)
-  res.status(200).sendFile(path.join(__dirname, "..", "views", "index.html"));
+  res.status(200).render("index", {
+    isAuthenticated: Boolean(req.user)
+  });
 };
 
 const getWelcomePage = (req, res, next) => {
-  res.status(200).sendFile(path.join(__dirname, "..", "views", "welcome.html"));
+  res.status(200).render("welcome", {
+    username: req.user.name,
+  });
 };
 
 const handleLoginSuccess = async (req, res, next) => {

@@ -17,6 +17,9 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 
+app.set("view engine", "ejs");
+app.set("views", "views");
+
 // Middleware
 
 app.use(express.json());
