@@ -169,6 +169,25 @@ const graphqlResolver = {
       totalPosts,
     };
   },
+
+  getPost: async ({ postId }, req) => {
+    if (!req.isAuth) {
+      const newError = new Error("Not authenticated.");
+      newError.statusCode = 401;
+      throw newError;
+    }
+
+    const post = await Post.findById(postId).populate("creator");
+
+    return {
+      post: {
+        ...post._doc,
+        _id: post._id.toString(),
+        createdAt: post.createdAt.toString(),
+        updatedAt: post.updatedAt.toString(),
+      },
+    };
+  },
 };
 
 module.exports = graphqlResolver;

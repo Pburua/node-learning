@@ -25,6 +25,10 @@ const graphqlSchema = buildSchema(`
     totalPosts: Int!
   }
 
+  type PostData {
+    post: Post!
+  }
+
   type AuthData {
     token: String!
     userId: String!
@@ -50,6 +54,7 @@ const graphqlSchema = buildSchema(`
   type RootQuery {
     login(email: String!, password: String!): AuthData!
     getPosts(page: Int!): PostsData!
+    getPost(postId: String!): PostData!
   }
 
   schema {

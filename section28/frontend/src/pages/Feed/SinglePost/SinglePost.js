@@ -1,41 +1,68 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import Image from '../../../components/Image/Image';
-import './SinglePost.css';
-import { BACKEND_URL } from '../../../env';
+import Image from "../../../components/Image/Image";
+import "./SinglePost.css";
+import { BACKEND_URL } from "../../../env";
 
 class SinglePost extends Component {
   state = {
-    title: '',
-    author: '',
-    date: '',
-    image: '',
-    content: ''
+    title: "",
+    author: "",
+    date: "",
+    image: "",
+    content: "",
   };
 
   componentDidMount() {
     const postId = this.props.match.params.postId;
-    fetch(`${BACKEND_URL}/feed/post/${postId}`, {
-      headers: {
-        'Authorization': 'Bearer ' + this.props.token,
-      }
-    })
-      .then(res => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch status');
+
+    const graphqlQuery = {
+      query: `{
+        getPost(postId: "${postId}") {
+          post {
+            _id
+            title
+            content
+            imageUrl
+            createdAt
+            creator {
+              name
+            }
+          }
         }
+      }`,
+    };
+
+    fetch(`${BACKEND_URL}/graphql`, {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + this.props.token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(graphqlQuery),
+    })
+      .then((res) => {
         return res.json();
       })
-      .then(resData => {
+      .then((resData) => {
+        console.log("resData", resData);
+        if (resData.errors && resData.errors[0].status === 422) {
+          throw new Error("Post not found.");
+        }
+        if (resData.errors) {
+          throw new Error("Failed to fetch a post.");
+        }
         this.setState({
-          title: resData.post.title,
-          author: resData.post.creator.name,
-          image: `${BACKEND_URL}/${resData.post.imageUrl}`,
-          date: new Date(resData.post.createdAt).toLocaleDateString('en-US'),
-          content: resData.post.content
+          title: resData.data.getPost.post.title,
+          author: resData.data.getPost.post.creator.name,
+          image: `${BACKEND_URL}/${resData.data.getPost.post.imageUrl}`,
+          date: new Date(
+            resData.data.getPost.post.createdAt
+          ).toLocaleDateString("en-US"),
+          content: resData.data.getPost.post.content,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }

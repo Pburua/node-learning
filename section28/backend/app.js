@@ -8,6 +8,7 @@ const { MONGO_URL } = require("./env");
 const graphqlSchema = require("./graphql/schema");
 const graphqlResolver = require("./graphql/resolvers");
 const auth = require("./middleware/auth");
+const fileHelper = require("./util/file-helper");
 
 // Configuration
 
@@ -31,6 +32,16 @@ const fileFilter = (req, file, cb) => {
 
 // Middleware
 
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use(express.json());
@@ -42,17 +53,25 @@ app.use(
   }).single("image")
 );
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
 app.use(auth);
+
+app.put("/save-image", (req, res, next) => {
+  if (!req.isAuth) {
+    const newError = new Error("Not authenticated.");
+    newError.statusCode = 401;
+    throw newError;
+  }
+  if (!req.file) {
+    return res.status(200).json({ message: "No file provided." });
+  }
+  if (req.body.oldPath) {
+    fileHelper.deleteImage(req.body.oldPath);
+  }
+  const filePath = req.file.path.replace("\\", "/");
+  return res
+    .status(200)
+    .json({ message: "File stored.", filePath });
+});
 
 app.use(
   "/graphql",
