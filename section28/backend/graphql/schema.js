@@ -6,7 +6,7 @@ const graphqlSchema = buildSchema(`
     title: String!
     content: String!
     imageUrl: String!
-    cretor: User
+    creator: User
     createdAt: String!
     updatedAt: String!
   }
@@ -20,6 +20,11 @@ const graphqlSchema = buildSchema(`
     posts: [Post!]!
   }
 
+  type PostsData {
+    posts: [Post!]!
+    totalPosts: Int!
+  }
+
   type AuthData {
     token: String!
     userId: String!
@@ -31,12 +36,20 @@ const graphqlSchema = buildSchema(`
     password: String!
   }
 
+  input PostInputData {
+    title: String!
+    content: String!
+    imageUrl: String!
+  }
+
   type RootMutation {
     createUser(userInput: UserInputData): User!
+    createPost(postInput: PostInputData): Post!
   }
 
   type RootQuery {
     login(email: String!, password: String!): AuthData!
+    getPosts(page: Int!): PostsData!
   }
 
   schema {

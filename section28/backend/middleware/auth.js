@@ -2,13 +2,12 @@ const jwt = require("jsonwebtoken");
 
 const { JWT_SECRET } = require("../env");
 
-const isAuth = (req, res, next) => {
+const auth = (req, res, next) => {
   const authHeader = req.get("Authorization");
 
   if (!authHeader) {
-    const newError = new Error("Not authenticated.");
-    newError.statusCode = 401;
-    throw newError;
+    req.isAuth = false;
+    return next();
   }
 
   const token = authHeader.split(" ")[1];
@@ -17,17 +16,19 @@ const isAuth = (req, res, next) => {
   try {
     decodedToken = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    next(err);
+    req.isAuth = false;
+    return next();
   }
 
   if (!decodedToken) {
-    const newError = new Error("Not authenticated.");
-    newError.statusCode = 401;
-    throw newError;
+    req.isAuth = false;
+    return next();
   }
 
   req.userId = decodedToken.userId;
+  req.isAuth = true;
+
   next();
 };
 
-module.exports = isAuth;
+module.exports = auth;

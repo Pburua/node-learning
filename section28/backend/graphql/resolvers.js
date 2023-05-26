@@ -3,6 +3,7 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
+const Post = require("../models/post");
 const { JWT_SECRET } = require("../env");
 
 const graphqlResolver = {
@@ -78,6 +79,95 @@ const graphqlResolver = {
     );
 
     return { token, userId: user._id.toString() };
+  },
+
+  createPost: async ({ postInput }, req) => {
+    if (!req.isAuth) {
+      const newError = new Error("Not authenticated.");
+      newError.statusCode = 401;
+      throw newError;
+    }
+
+    const title = postInput.title;
+    const content = postInput.content;
+    const imageUrl = postInput.imageUrl;
+
+    const errors = [];
+
+    if (validator.isEmpty(title))
+      errors.push({
+        message: "Title is invalid.",
+      });
+    if (validator.isEmpty(content))
+      errors.push({
+        message: "Content is invalid.",
+      });
+    // if (!validator.isURL(imageUrl))
+    //   errors.push({
+    //     message: "Image url is invalid.",
+    //   });
+
+    if (errors.length > 0) {
+      const newError = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      const newError = new Error("Not authenticated.");
+      newError.statusCode = 401;
+      throw newError;
+    }
+
+    const newPost = new Post({ title, content, imageUrl, creator: user });
+
+    const createdPost = await newPost.save();
+
+    user.posts.push(createdPost);
+
+    await user.save();
+
+    return {
+      ...createdPost._doc,
+      _id: createdPost._id.toString(),
+      createdAt: createdPost.createdAt.toString(),
+      updatedAt: createdPost.updatedAt.toString(),
+    };
+  },
+
+  getPosts: async ({ page }, req) => {
+    if (!req.isAuth) {
+      const newError = new Error("Not authenticated.");
+      newError.statusCode = 401;
+      throw newError;
+    }
+
+    if (!page) page = 1;
+
+    const perPage = 2;
+
+    const totalPosts = await Post.find().countDocuments();
+
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .populate("creator");
+
+    return {
+      posts: posts.map((post) => {
+        return {
+          ...post._doc,
+          _id: post._id.toString(),
+          createdAt: post.createdAt.toString(),
+          updatedAt: post.updatedAt.toString(),
+        };
+      }),
+      totalPosts,
+    };
   },
 };
 

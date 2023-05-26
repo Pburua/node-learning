@@ -5,9 +5,9 @@ const multer = require("multer");
 const { graphqlHTTP } = require("express-graphql");
 
 const { MONGO_URL } = require("./env");
-const errorHandler = require("./middleware/error-handler");
 const graphqlSchema = require("./graphql/schema");
 const graphqlResolver = require("./graphql/resolvers");
+const auth = require("./middleware/auth");
 
 // Configuration
 
@@ -52,6 +52,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(auth);
+
 app.use(
   "/graphql",
   graphqlHTTP({
@@ -73,8 +75,6 @@ app.use(
     },
   })
 );
-
-app.use(errorHandler);
 
 // Startup
 
