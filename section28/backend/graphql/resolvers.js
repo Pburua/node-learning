@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const Post = require("../models/post");
 const { JWT_SECRET } = require("../env");
+const fileHelper = require("../util/file-helper");
 
 const graphqlResolver = {
   createUser: async ({ userInput }, req) => {
@@ -254,6 +255,46 @@ const graphqlResolver = {
       createdAt: updatedPost.createdAt.toString(),
       updatedAt: updatedPost.updatedAt.toString(),
     };
+  },
+
+  deletePost: async ({ id }, req) => {
+    if (!req.isAuth) {
+      const newError = new Error("Not authenticated.");
+      newError.statusCode = 401;
+      throw newError;
+    }
+
+    const post = await Post.findById(id);
+
+    if (!post) {
+      const newError = new Error("Post not found.");
+      newError.statusCode = 404;
+      throw newError;
+    }
+
+    if (post.creator.toString() !== req.userId.toString()) {
+      const newError = new Error("Not authorized.");
+      newError.statusCode = 403;
+      throw newError;
+    }
+
+    const user = await User.findById(post.creator.toString());
+
+    if (!user) {
+      const newError = new Error("Post creator not found.");
+      newError.statusCode = 404;
+      throw newError;
+    }
+
+    await Post.findByIdAndRemove(id);
+
+    user.posts.pull(id);
+
+    await user.save();
+
+    await fileHelper.deleteImage(post.imageUrl);
+
+    return true;
   },
 };
 
