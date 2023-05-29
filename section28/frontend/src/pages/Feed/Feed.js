@@ -66,21 +66,26 @@ class Feed extends Component {
     }
 
     const graphqlQuery = {
-      query: `{
-        getPosts(page: ${page}) {
-          posts {
-            _id
-            title
-            content
-            imageUrl
-            createdAt
-            creator {
-              name
+      query: `
+        query FetchPosts($page: Int!) {
+          getPosts(page: $page) {
+            posts {
+              _id
+              title
+              content
+              imageUrl
+              createdAt
+              creator {
+                name
+              }
             }
+            totalPosts
           }
-          totalPosts
         }
-      }`,
+      `,
+      variables: {
+        page,
+      },
     };
 
     fetch(`${BACKEND_URL}/graphql`, {
@@ -118,10 +123,13 @@ class Feed extends Component {
 
     const graphqlQuery = {
       query: `
-        mutation {
-          updateStatus(status: "${this.state.status}")
+        mutation UpdateStatus ($status: String!) {
+          updateStatus(status: $status)
         }
       `,
+      variables: {
+        status: this.state.status,
+      },
     };
 
     fetch(`${BACKEND_URL}/graphql`, {
@@ -185,16 +193,16 @@ class Feed extends Component {
         return res.json();
       })
       .then((fileResData) => {
-        const imageUrl = fileResData.filePath;
+        const imageUrl = fileResData.filePath || 'undefined';
 
         let graphqlQuery = {
           query: `
-            mutation {
+            mutation CreatePost ($title: String!, $content: String!, $imageUrl: String!) {
               createPost(
                 postInput: {
-                  title: "${postData.title}" 
-                  content: "${postData.content}" 
-                  imageUrl: "${imageUrl}"
+                  title: $title 
+                  content: $content 
+                  imageUrl: $imageUrl
                 }
               ){
                 _id
@@ -208,18 +216,28 @@ class Feed extends Component {
               }
             }
           `,
+          variables: {
+            title: postData.title,
+            content: postData.content,
+            imageUrl,
+          },
         };
 
         if (this.state.editPost) {
           graphqlQuery = {
             query: `
-              mutation {
+              mutation UpdatePost (
+                $id: ID! 
+                $title: String! 
+                $content: String!
+                $imageUrl: String!
+              ){
                 updatePost(
-                  id: "${this.state.editPost._id}"
+                  id: $id
                   postInput: {
-                    title: "${postData.title}" 
-                    content: "${postData.content}" 
-                    imageUrl: "${imageUrl}"
+                    title: $title
+                    content: $content 
+                    imageUrl: $imageUrl
                   }
                 ){
                   _id
@@ -233,6 +251,12 @@ class Feed extends Component {
                 }
               }
             `,
+            variables: {
+              id: this.state.editPost._id,
+              title: postData.title,
+              content: postData.content,
+              imageUrl,
+            },
           };
         }
 
@@ -272,12 +296,14 @@ class Feed extends Component {
         };
         this.setState((prevState) => {
           let updatedPosts = [...prevState.posts];
+          let updatedTotalPosts = prevState.totalPosts;
           if (prevState.editPost) {
             const postIndex = prevState.posts.findIndex(
               (p) => p._id === prevState.editPost._id
             );
             updatedPosts[postIndex] = post;
           } else {
+            updatedTotalPosts += 1;
             if (prevState.posts.length >= 2) {
               updatedPosts.pop();
             }
@@ -288,6 +314,7 @@ class Feed extends Component {
             isEditing: false,
             editPost: null,
             editLoading: false,
+            totalPosts: updatedTotalPosts
           };
         });
       })
