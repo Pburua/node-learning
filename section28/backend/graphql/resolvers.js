@@ -102,10 +102,10 @@ const graphqlResolver = {
       errors.push({
         message: "Content is invalid.",
       });
-    // if (!validator.isURL(imageUrl))
-    //   errors.push({
-    //     message: "Image url is invalid.",
-    //   });
+    if (validator.isEmpty(imageUrl))
+      errors.push({
+        message: "Image url is invalid.",
+      });
 
     if (errors.length > 0) {
       const newError = new Error("Invalid input");
@@ -179,6 +179,12 @@ const graphqlResolver = {
 
     const post = await Post.findById(postId).populate("creator");
 
+    if (!post) {
+      const newError = new Error("Post not found.");
+      newError.statusCode = 404;
+      throw newError;
+    }
+
     return {
       post: {
         ...post._doc,
@@ -186,6 +192,67 @@ const graphqlResolver = {
         createdAt: post.createdAt.toString(),
         updatedAt: post.updatedAt.toString(),
       },
+    };
+  },
+
+  updatePost: async ({ id, postInput }, req) => {
+    if (!req.isAuth) {
+      const newError = new Error("Not authenticated.");
+      newError.statusCode = 401;
+      throw newError;
+    }
+
+    const post = await Post.findById(id).populate("creator");
+
+    if (!post) {
+      const newError = new Error("Post not found.");
+      newError.statusCode = 404;
+      throw newError;
+    }
+
+    if (post.creator._id.toString() !== req.userId.toString()) {
+      const newError = new Error("Not authorized.");
+      newError.statusCode = 403;
+      throw newError;
+    }
+
+    const errors = [];
+
+    if (validator.isEmpty(postInput.title))
+      errors.push({
+        message: "Title is invalid.",
+      });
+    if (validator.isEmpty(postInput.content))
+      errors.push({
+        message: "Content is invalid.",
+      });
+    if (
+      validator.isEmpty(postInput.imageUrl) &&
+      postInput.imageUrl !== "undefined"
+    )
+      errors.push({
+        message: "Image url is invalid.",
+      });
+
+    if (errors.length > 0) {
+      const newError = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+
+    post.title = postInput.title;
+    post.content = postInput.content;
+
+    if (postInput.imageUrl !== "undefined") post.imageUrl = postInput.imageUrl;
+
+    const updatedPost = await post.save();
+
+    return {
+      ...updatedPost._doc,
+      _id: updatedPost._id.toString(),
+      createdAt: updatedPost.createdAt.toString(),
+      updatedAt: updatedPost.updatedAt.toString(),
     };
   },
 };

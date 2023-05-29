@@ -8,7 +8,7 @@ const deleteFile = (filePath) => {
 };
 
 const deleteImage = (imageName) => {
-  const filePath = path.join(__dirname, '..', 'images', imageName);
+  const filePath = path.join(__dirname, '..', imageName);
   fs.unlink(filePath, (err) => {
     if (err) throw err;
   });
