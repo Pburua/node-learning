@@ -296,6 +296,60 @@ const graphqlResolver = {
 
     return true;
   },
+
+  getStatus: async (data, req) => {
+    if (!req.isAuth) {
+      const newError = new Error("Not authenticated.");
+      newError.statusCode = 401;
+      throw newError;
+    }
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      const newError = new Error("User not found.");
+      newError.statusCode = 404;
+      throw newError;
+    }
+
+    return user.status;
+  },
+
+  updateStatus: async ({ status }, req) => {
+    if (!req.isAuth) {
+      const newError = new Error("Not authenticated.");
+      newError.statusCode = 401;
+      throw newError;
+    }
+
+    const errors = [];
+
+    if (validator.isEmpty(status))
+      errors.push({
+        message: "Status is invalid.",
+      });
+
+    if (errors.length > 0) {
+      const newError = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      const newError = new Error("User not found.");
+      newError.statusCode = 404;
+      throw newError;
+    }
+
+    user.status = status;
+
+    await user.save();
+
+    return user.status;
+  },
 };
 
 module.exports = graphqlResolver;

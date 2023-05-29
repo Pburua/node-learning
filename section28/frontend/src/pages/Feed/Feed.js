@@ -23,19 +23,28 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch(`${BACKEND_URL}/feed/status`, {
+    const graphqlQuery = {
+      query: `{
+        getStatus
+      }`,
+    };
+
+    fetch(`${BACKEND_URL}/graphql`, {
+      method: "POST",
+      body: JSON.stringify(graphqlQuery),
       headers: {
         Authorization: "Bearer " + this.props.token,
+        "Content-Type": "application/json",
       },
     })
       .then((res) => {
-        if (res.status !== 200) {
-          throw new Error("Failed to fetch user status.");
-        }
         return res.json();
       })
       .then((resData) => {
-        this.setState({ status: resData.status });
+        if (resData.errors) {
+          throw new Error("Failed to fetch user status.");
+        }
+        this.setState({ status: resData.data.getStatus });
       })
       .catch(this.catchError);
 
@@ -106,21 +115,30 @@ class Feed extends Component {
 
   statusUpdateHandler = (event) => {
     event.preventDefault();
-    fetch(`${BACKEND_URL}/feed/status`, {
-      method: "PUT",
+
+    const graphqlQuery = {
+      query: `
+        mutation {
+          updateStatus(status: "${this.state.status}")
+        }
+      `,
+    };
+
+    fetch(`${BACKEND_URL}/graphql`, {
+      method: "POST",
+      body: JSON.stringify(graphqlQuery),
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + this.props.token,
       },
-      body: JSON.stringify({ status: this.state.status }),
     })
       .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Can't update status!");
-        }
         return res.json();
       })
       .then((resData) => {
+        if (resData.errors) {
+          throw new Error("Can't update status!");
+        }
         console.log(resData);
       })
       .catch(this.catchError);
@@ -260,7 +278,9 @@ class Feed extends Component {
             );
             updatedPosts[postIndex] = post;
           } else {
-            updatedPosts.pop();
+            if (prevState.posts.length >= 2) {
+              updatedPosts.pop();
+            }
             updatedPosts.unshift(post);
           }
           return {
