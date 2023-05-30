@@ -8,3 +8,4 @@ env.js
 images
 data
 nodemon.json
+access.log
