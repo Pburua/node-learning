@@ -5,9 +5,8 @@ const stripeSetupFunc = require("stripe");
 
 const Order = require("../models/order");
 const Product = require("../models/product");
-const { STRIPE_SECRET_KEY } = require("../env");
 
-const stripe = stripeSetupFunc(STRIPE_SECRET_KEY);
+const stripe = stripeSetupFunc(process.env.STRIPE_SECRET_KEY);
 
 const ITEMS_PER_PAGE = 2;
 

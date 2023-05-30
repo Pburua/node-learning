@@ -7,7 +7,6 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
 
-const { MONGO_URL } = require("./env");
 const errorController = require("./controllers/error");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
@@ -21,7 +20,7 @@ const setRenderLocals = require("./middleware/set-render-locals");
 const app = express();
 
 const store = new MongoDBStore({
-  uri: MONGO_URL,
+  uri: process.env.MONGO_URL,
   collection: "sessions",
 });
 
@@ -84,11 +83,11 @@ app.use(errorHandler);
 // Setting up mongodb and listening
 
 mongoose
-  .connect(MONGO_URL)
+  .connect(process.env.MONGO_URL)
   .then(() => {
     console.log("MongdoDB connection established.");
-    app.listen(8080, () => {
-      console.log(`Server listening at port ${8080}`);
+    app.listen(process.env.PORT, () => {
+      console.log(`Server listening at port ${process.env.PORT}`);
     });
   })
   .catch((err) => {

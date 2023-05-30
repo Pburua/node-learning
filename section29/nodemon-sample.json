@@ -1,0 +1,10 @@
+{
+  "comment": "Fill in env vars and rename this file to nodemon.json", 
+  "env": {
+    "PORT": 3000,
+    "MONGO_URL": "mongodb://localhost:27017/shop",
+    "FROM_EMAIL": "",
+    "SENDGRID_API_KEY": "",
+    "STRIPE_SECRET_KEY": ""
+  }
+}

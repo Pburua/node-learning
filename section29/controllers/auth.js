@@ -5,12 +5,11 @@ const crypto = require("crypto");
 const { validationResult } = require("express-validator");
 
 const User = require("../models/user");
-const { SENDGRID_API_KEY, FROM_EMAIL } = require("../env");
 
 const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
-      api_key: SENDGRID_API_KEY,
+      api_key: process.env.SENDGRID_API_KEY,
     },
   })
 );
@@ -66,7 +65,7 @@ exports.postSignUp = (req, res, next) => {
       res.redirect("/login");
       return transporter.sendMail({
         to: email,
-        from: FROM_EMAIL,
+        from: process.env.FROM_EMAIL,
         subject: "Signup succeeded!",
         html: "<h1>You have successfully signed up</h1>",
       });
@@ -183,7 +182,7 @@ exports.postResetPassword = (req, res, next) => {
         res.redirect("/reset-password");
         return transporter.sendMail({
           to: req.body.email,
-          from: FROM_EMAIL,
+          from: process.env.FROM_EMAIL,
           subject: "Password reset",
           html: `<h1>You requested a password reset:</h1>
             <a href="http://localhost:8080/new-password/${token}">

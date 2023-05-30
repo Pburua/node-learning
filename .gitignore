@@ -7,3 +7,4 @@ node_modules
 env.js
 images
 data
+nodemon.json
