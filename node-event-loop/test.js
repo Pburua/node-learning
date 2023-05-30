@@ -12,7 +12,7 @@
 // setImmediate(() => console.log("immediate"));
 
 // EXAMPLE 3
-// nextTick -> immediate -> timeout 
+// nextTick -> immediate -> timeout
 
 // const fs = require("fs");
 // fs.readFile(__filename, () => {
@@ -20,3 +20,14 @@
 //   setImmediate(() => console.log("immediate"));
 //   process.nextTick(() => console.log("nextTick"));
 // });
+
+// EXAMPLE 4
+// microtask -> macrotask
+
+setTimeout(() => console.log("macrotask"), 0);
+
+var promise = new Promise((resolve) => {
+  resolve();
+}).then(() => {
+  console.log("microtask");
+});
