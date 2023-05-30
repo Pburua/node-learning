@@ -3,6 +3,7 @@
 ## Useful articles:
 
 https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick
+
 https://nodejs.dev/en/learn/understanding-processnexttick/
 
 ## Takeaways:
