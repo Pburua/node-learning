@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const https = require("https");
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
@@ -57,6 +58,9 @@ const accessLogStream = fs.createWriteStream(
   { flags: "a" }
 );
 
+// const privateKey = fs.readFileSync("server.key");
+// const certificate = fs.readFileSync("server.cert");
+
 // Middleware
 
 app.use(helmet());
@@ -98,6 +102,11 @@ mongoose
   .connect(process.env.MONGO_URL)
   .then(() => {
     console.log("MongdoDB connection established.");
+    // https
+    //   .createServer({ key: privateKey, cert: certificate }, app)
+    //   .listen(process.env.PORT, () => {
+    //     console.log(`Server listening at port ${process.env.PORT}`);
+    //   });
     app.listen(process.env.PORT, () => {
       console.log(`Server listening at port ${process.env.PORT}`);
     });

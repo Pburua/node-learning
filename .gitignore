@@ -9,3 +9,5 @@ images
 data
 nodemon.json
 access.log
+server.cert
+server.key
