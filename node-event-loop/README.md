@@ -17,3 +17,5 @@ The order in which the timers are executed will vary depending on the context in
 ### process.nextTick()
 
 `process.nextTick()` is not technically part of the event loop. Instead, the `nextTickQueue` will be processed after the current operation is completed, regardless of the current phase of the event loop. Any time you call `process.nextTick()` in a given phase, all callbacks passed to `process.nextTick()` will be resolved before the event loop continues.
+
+Moreover, calling `process.nextTick()` doesn't just call any code immediately after the current loop phase, but it skips the rest of the current event loop phases and starts the next event loop iteration straight after that.
