@@ -1,0 +1,46 @@
+<%- include('../includes/head.ejs') %>
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+
+        <main>
+            <% if (cartProducts.length > 0) { %>
+                <ul>
+                    <% cartProducts.forEach((cartProduct) => { %>
+                        <% if (cartProduct.productId && cartProduct.quantity) { %>
+                        <p>
+                            <li>
+                                <%= cartProduct.productId.title %> 
+                                (<%= cartProduct.quantity %>)
+                            </li>
+                        </p>
+                        <% } else { %>
+                            <p>
+                                <li>
+                                    DELETED PRODUCT!
+                                </li>
+                            </p>
+                        <% } %>
+                    <% }) %>
+                </ul>
+                <div>Total: <%= totalSum %></div>
+                <div>
+                    <button id="order-btn" class="btn">Order!</button>
+                    <script src="https://js.stripe.com/v3/"></script>
+                    <script>
+                        const stripe = Stripe('pk_test_51N94VJDizlUhKKRBVlCmjnKoi3qog390nDBzDFJcGUlrgA2rCx41qQ75GAlFl0js55kRBMTeNfuPHSloxbiavHXq00u0R5ZAMV');
+                        const orderBtn = document.getElementById("order-btn");
+                        orderBtn.addEventListener("click", () => {
+                            stripe.redirectToCheckout({
+                                sessionId: '<%= stripeSessionId %>'
+                            });
+                        });
+                    </script>
+                </div>
+            <% } else { %>
+                <h1>No products in the cart</h1>
+            <% } %>
+        </main>
+
+        <%- include('../includes/end.ejs') %>
