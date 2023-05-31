@@ -77,7 +77,7 @@ const createPost = async (req, res, next) => {
 
     creator.posts.push(newPost);
 
-    await creator.save();
+    const savedUser = await creator.save();
 
     socketHelper.getIO().emit("posts", {
       action: "create",
@@ -92,6 +92,7 @@ const createPost = async (req, res, next) => {
       post: newPost,
       creator: { _id: creator._id, name: creator.name },
     });
+    return savedUser;
   } catch (err) {
     next(err);
   }
