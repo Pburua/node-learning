@@ -68,8 +68,10 @@ const login = async (req, res, next) => {
       token,
       userId: loadedUser._id.toString(),
     });
+    return;
   } catch (err) {
     next(err);
+    return err;
   }
 };
 
