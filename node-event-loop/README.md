@@ -3,6 +3,7 @@
 ## Useful articles:
 
 https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick
+
 https://nodejs.dev/en/learn/understanding-processnexttick/
 
 ## Takeaways:
@@ -24,5 +25,5 @@ Moreover, calling `process.nextTick()` doesn't just call any code immediately af
 
 Only after tasks in microTasks are completed / exhausted, event loop will next pick up one task from macroTasks. And this repeats.
 
-1. microTasks: process.nextTick, Promises, queueMicrotask, MutationObserver
-2. macroTasks: setTimeout, setInterval, setImmediate, requestAnimationFrame, I/O, UI rendering
+1. `microTasks`: process.nextTick, Promises, queueMicrotask, MutationObserver
+2. `macroTasks`: setTimeout, setInterval, setImmediate, requestAnimationFrame, I/O, UI rendering
