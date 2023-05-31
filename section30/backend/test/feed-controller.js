@@ -7,9 +7,8 @@ const { MONGO_TEST_URL } = require("../env");
 const feedController = require("../controllers/feed");
 
 describe("feed-controller: getStatus", () => {
-  it("should send a valid response with user status if user exists", async () => {
+  before(async () => {
     await mongoose.connect(MONGO_TEST_URL);
-
     const user = new User({
       _id: "5c0f66b979af55031b34728a",
       email: "bob@the.builder",
@@ -18,9 +17,10 @@ describe("feed-controller: getStatus", () => {
       status: "We can fix this!",
       posts: [],
     });
-
     await user.save();
+  });
 
+  it("should send a valid response with user status if user exists", async () => {
     const req = {
       userId: "5c0f66b979af55031b34728a",
     };
@@ -40,10 +40,11 @@ describe("feed-controller: getStatus", () => {
     await feedController.getStatus(req, res, next);
 
     expect(res.statusCode).to.be.equal(200);
-    expect(res.userStatus).to.be.equal(user.status);
+    expect(res.userStatus).to.be.equal("We can fix this!");
+  });
 
+  after(async () => {
     await User.deleteMany({});
-
     mongoose.disconnect();
   });
 });
