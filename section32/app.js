@@ -1,13 +1,11 @@
-const fs = require('fs');
+import express from "express";
 
-const express = require('express');
+import resHandler from "./res-handler.js";
 
 const app = express();
 
-app.get('/', (req, res, next) => {
-  fs.readFile('my-page.html', 'utf8', (err, data) => {
-    res.send(data);
-  });
-});
+app.get("/", resHandler);
 
-app.listen(3000);
+app.listen(3000, () => {
+  console.log('App listening on port 3000.')
+});
