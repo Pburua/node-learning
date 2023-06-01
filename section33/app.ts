@@ -22,7 +22,7 @@ function printResult(result: Result) {
 }
 
 buttonElement?.addEventListener('click', () => {
-  const value1 = +input1Element?.value
+  const value1 = +input1Element?.value;
   const value2 = +input2Element?.value;
   const sum = add(value1, value2);
   printResult({
