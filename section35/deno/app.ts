@@ -1,6 +1,7 @@
 import { Application } from "https://deno.land/x/oak/mod.ts";
 
 import todosRoutes from './routes/todos.ts';
+import { connect } from "./helpers/db.ts";
 
 // SETUP
 
@@ -21,6 +22,8 @@ app.use(todosRoutes.routes());
 app.use(todosRoutes.allowedMethods());
 
 // STARTUP
+
+await connect();
 
 app.addEventListener("listen", () => {
   console.log(`Server is listening on port ${port}`)
