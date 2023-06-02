@@ -1,4 +1,6 @@
-import { Database, MongoClient } from "https://deno.land/x/mongo/mod.ts";
+import { Database, MongoClient } from "https://deno.land/x/mongo@v0.31.2/mod.ts";
+
+import DBTodo from "../models/dbtodo.ts";
 
 let db: Database;
 
@@ -14,7 +16,12 @@ function getDB() {
   return db;
 }
 
+function getTodoCollection() {
+  return db.collection<DBTodo>('todos');
+}
+
 export {
   connect,
-  getDB
+  getDB,
+  getTodoCollection,
 }
