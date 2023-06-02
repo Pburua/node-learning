@@ -1,4 +1,4 @@
-import { Application } from 'https://deno.land/x/oak/mod.ts';
+import { Application } from "https://deno.land/x/oak@v12.5.0/mod.ts";
 
 const port = 8080;
 const app = new Application();
