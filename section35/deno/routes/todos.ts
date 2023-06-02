@@ -1,44 +1,52 @@
-import { Router } from 'https://deno.land/x/oak/mod.ts';
-
-const router = new Router();
+import { Router } from "https://deno.land/x/oak@v12.5.0/mod.ts";
 
 interface Todo {
-  id: string;
-  text: string;
+  id: string
+  text: string
 }
 
-let todos: Todo[] = [];
+const todoRouter = new Router();
 
-router.get('/todos', (ctx) => {
-  ctx.response.body = { todos: todos };
+const todos: Todo[] = [];
+
+todoRouter.get("/todos", (ctx) => {
+  ctx.response.body = { todos };
 });
 
-router.post('/todos', async (ctx) => {
-  const data = await ctx.request.body();
+todoRouter.post("/todos", async (ctx) => {
+  const reqData = await ctx.request.body().value;
+
   const newTodo: Todo = {
-    id: new Date().toISOString(),
-    text: data.value.text,
+    id: new Date().getTime().toString(),
+    text: reqData.text,
   };
-
   todos.push(newTodo);
-
-  ctx.response.body = { message: 'Created todo!', todo: newTodo };
+  ctx.response.body = { todo: newTodo, message: "Todo was created successfully!" };
 });
 
-router.put('/todos/:todoId', async (ctx) => {
-  const tid = ctx.params.todoId;
-  const data = await ctx.request.body();
-  const todoIndex = todos.findIndex((todo) => {
-    return todo.id === tid;
-  });
-  todos[todoIndex] = { id: todos[todoIndex].id, text: data.value.text };
-  ctx.response.body = { message: 'Updated todo' };
+todoRouter.put("/todos/:todoId", async (ctx) => {
+  const reqData = await ctx.request.body().value;
+  const reqParams = ctx.params;
+  const todoId = reqParams.todoId;
+  const todoIndex = todos.findIndex((curTodo) => todoId === curTodo.id);
+  if (todoIndex == -1) {
+    ctx.response.body = { message: "Todo not found!" };
+    return;
+  }
+  todos[todoIndex] = { ...todos[todoIndex], text: reqData.text };
+  ctx.response.body = { message: "Todo was updated successfully!" };
 });
 
-router.delete('/todos/:todoId', (ctx) => {
-  const tid = ctx.params.todoId;
-  todos = todos.filter((todo) => todo.id !== tid);
-  ctx.response.body = { message: 'Deleted todo' };
+todoRouter.delete("/todos/:todoId", (ctx) => {
+  const reqParams = ctx.params;
+  const todoId = reqParams.todoId;
+  const todoIndex = todos.findIndex((curTodo) => todoId === curTodo.id);
+  if (todoIndex == -1) {
+    ctx.response.body = { message: "Todo not found!" };
+    return;
+  }
+  todos.splice(todoIndex, 1);
+  ctx.response.body = { message: "Todo was deleted successfully!" };
 });
 
-export default router;
+export default todoRouter;
