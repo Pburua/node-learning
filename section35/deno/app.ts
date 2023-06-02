@@ -1,4 +1,4 @@
-import { Application } from "https://deno.land/x/oak/mod.ts";
+import { Application } from "https://deno.land/x/oak@v12.5.0/mod.ts";
 
 import todosRoutes from './routes/todos.ts';
 import { connect } from "./helpers/db.ts";
